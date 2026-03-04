@@ -1,0 +1,12 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="1000" fill="#F4EFE8"/>
+  <rect y="620" width="1600" height="380" fill="#D5E3EE"/>
+  <circle cx="1240" cy="220" r="120" fill="#F4A261"/>
+  <path d="M0 700L180 640L320 690L470 610L690 710L860 650L1080 760L1300 680L1600 760V1000H0V700Z" fill="#0F4C5C"/>
+  <path d="M240 540H460V760H240V540Z" fill="#1D3557"/>
+  <path d="M520 470H710V760H520V470Z" fill="#274C77"/>
+  <path d="M790 380H1000V760H790V380Z" fill="#335C67"/>
+  <path d="M1070 500H1290V760H1070V500Z" fill="#3A506B"/>
+  <text x="110" y="140" fill="#1D3557" font-family="Arial, sans-serif" font-size="58" letter-spacing="8">UNIVERSITY MAGAZINE</text>
+  <text x="110" y="210" fill="#52796F" font-family="Arial, sans-serif" font-size="28" letter-spacing="4">CAMPUS LIGHT / MORNING EDITION</text>
+</svg>

@@ -1,0 +1,15 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="1000" fill="#EFF6F9"/>
+  <rect x="110" y="90" width="1380" height="820" rx="32" fill="#FFFFFF"/>
+  <rect x="180" y="170" width="560" height="660" rx="24" fill="#DCE7F3"/>
+  <rect x="800" y="170" width="530" height="290" rx="24" fill="#D9F0E4"/>
+  <rect x="800" y="510" width="530" height="320" rx="24" fill="#F1E7D6"/>
+  <circle cx="460" cy="490" r="170" stroke="#1D3557" stroke-width="18"/>
+  <path d="M350 490H570" stroke="#1D3557" stroke-width="16" stroke-linecap="round"/>
+  <path d="M460 380V600" stroke="#1D3557" stroke-width="16" stroke-linecap="round"/>
+  <path d="M875 255H1240" stroke="#40916C" stroke-width="18" stroke-linecap="round"/>
+  <path d="M875 325H1190" stroke="#40916C" stroke-width="18" stroke-linecap="round"/>
+  <path d="M875 595H1235" stroke="#9C6644" stroke-width="18" stroke-linecap="round"/>
+  <path d="M875 665H1150" stroke="#9C6644" stroke-width="18" stroke-linecap="round"/>
+  <text x="190" y="865" fill="#1D3557" font-family="Arial, sans-serif" font-size="48" letter-spacing="6">RESEARCH SKETCHES</text>
+</svg>
