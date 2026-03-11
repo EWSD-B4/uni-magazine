@@ -25,7 +25,7 @@ export default async function ArticleDetailPage({ params }) {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#ffffff,_#f3f4f6_65%,_#e2e8f0_100%)] px-6 py-10">
+    <div className="min-h-screen px-6 py-10">
       <div className="mx-auto flex max-w-5xl flex-col gap-8">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-3">

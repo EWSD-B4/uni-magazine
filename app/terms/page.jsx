@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator"
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#ffffff,_#f3f4f6_65%,_#e2e8f0_100%)] px-6 py-12">
+    <div className="min-h-screen px-6 py-12">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>

@@ -21,10 +21,7 @@ const HIGHLIGHTS = [
 
 export default function HomePage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_#fdfcfb,_#f4efe8_35%,_#eef2f6_75%)]">
-      <div className="pointer-events-none absolute left-10 top-16 h-64 w-64 rounded-full bg-[radial-gradient(circle,_rgba(14,116,144,0.25),_transparent_70%)] blur-3xl" />
-      <div className="pointer-events-none absolute bottom-10 right-10 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(251,146,60,0.3),_transparent_70%)] blur-3xl" />
-
+    <div className="relative min-h-screen overflow-hidden">
       <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-10">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="text-sm font-semibold uppercase tracking-[0.24em] text-muted-foreground">

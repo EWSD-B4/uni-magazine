@@ -49,7 +49,7 @@ export default async function DashboardLayout({
   )
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fafc,_#eef2f6_60%,_#e2e8f0_100%)]">
+    <div className="min-h-screen">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
