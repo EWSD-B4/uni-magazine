@@ -11,13 +11,12 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { filterArticlesForViewer } from "@/lib/article-access"
-import { isFacultyScopedRole, requireAuthSession, ROLE_LABELS } from "@/lib/auth"
+import { requireAuthSession } from "@/lib/auth"
 import { listArticles } from "@/lib/mockArticles"
 
 export default async function ArticlesPage() {
   const viewer = await requireAuthSession()
   const articles = filterArticlesForViewer(listArticles(), viewer)
-  const facultyScoped = isFacultyScopedRole(viewer.role)
 
   return (
     <div className="min-h-screen px-6 py-10">
@@ -31,10 +30,7 @@ export default async function ArticlesPage() {
               Faculty Article Listings
             </h1>
             <p className="max-w-2xl text-sm text-slate-600 md:text-base">
-              Viewing as {ROLE_LABELS[viewer.role]}
-              {facultyScoped && viewer.faculty
-                ? ` for ${viewer.faculty}.`
-                : ". Managers and admins can review all faculties."}
+              Browse available articles in your access scope.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -54,15 +50,6 @@ export default async function ArticlesPage() {
           <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
             {articles.length} articles
           </span>
-          {facultyScoped && viewer.faculty ? (
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
-              Faculty: {viewer.faculty}
-            </span>
-          ) : (
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
-              Scope: All faculties
-            </span>
-          )}
         </div>
 
         <Separator />

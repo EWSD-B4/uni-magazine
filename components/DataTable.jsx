@@ -19,6 +19,11 @@ import {
 import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+const tableMenuContentClass =
+  "bg-[#f8f4ec] text-slate-900 border border-slate-300 shadow-lg"
+const tableMenuItemClass =
+  "text-slate-900 [&_svg]:text-slate-600 focus:bg-slate-200 focus:text-slate-900"
+
 export function DataTable({
   data,
   columns,
@@ -116,10 +121,14 @@ export function DataTable({
                         <span className="sr-only">Open menu</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent
+                      align="end"
+                      className={tableMenuContentClass}
+                    >
                       {actions.map((action, actionIndex) => (
                         <DropdownMenuItem
                           key={actionIndex}
+                          className={tableMenuItemClass}
                           onClick={() => action.onClick(row)}
                         >
                           {action.label}

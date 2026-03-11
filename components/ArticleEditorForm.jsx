@@ -212,8 +212,8 @@ function createSlashCommandExtension() {
               popup.style.maxWidth = "300px"
               popup.style.padding = "6px"
               popup.style.borderRadius = "10px"
-              popup.style.border = "1px solid hsl(var(--border))"
-              popup.style.background = "hsl(var(--popover))"
+              popup.style.border = "1px solid rgba(100, 116, 139, 0.35)"
+              popup.style.background = "#f8f4ec"
               popup.style.boxShadow =
                 "0 22px 40px -24px rgba(15, 23, 42, 0.45), 0 10px 20px -18px rgba(15, 23, 42, 0.35)"
 
@@ -222,7 +222,7 @@ function createSlashCommandExtension() {
                 emptyState.textContent = "No commands found"
                 emptyState.style.margin = "6px"
                 emptyState.style.fontSize = "13px"
-                emptyState.style.color = "hsl(var(--muted-foreground))"
+                emptyState.style.color = "#64748b"
                 popup.appendChild(emptyState)
                 positionPopup()
                 return
@@ -243,11 +243,11 @@ function createSlashCommandExtension() {
                 button.style.borderRadius = "8px"
                 button.style.cursor = "pointer"
                 button.style.background = isSelected
-                  ? "hsl(var(--accent))"
+                  ? "#e7dece"
                   : "transparent"
                 button.style.color = isSelected
-                  ? "hsl(var(--accent-foreground))"
-                  : "hsl(var(--popover-foreground))"
+                  ? "#0f172a"
+                  : "#111827"
 
                 const title = document.createElement("span")
                 title.textContent = item.title
@@ -378,6 +378,13 @@ function getBlockTypeLabel(editor) {
   if (editor.isActive("heading", { level: 3 })) return "H3"
   return "Paragraph"
 }
+
+const editorMenuContentClass =
+  "bg-[#f8f4ec] text-slate-900 border border-slate-300 shadow-lg"
+const editorMenuItemClass =
+  "text-slate-900 [&_svg]:text-slate-600 focus:bg-slate-200 focus:text-slate-900"
+const editorMenuLabelClass = "text-slate-900"
+const editorMenuSeparatorClass = "bg-slate-300"
 
 export default function ArticleEditorForm({ article }) {
   const imageUploadRef = React.useRef(null)
@@ -607,17 +614,29 @@ export default function ArticleEditorForm({ article }) {
                   <ChevronDown className="size-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem onSelect={() => setBlockType("paragraph")}>
+              <DropdownMenuContent align="start" className={editorMenuContentClass}>
+                <DropdownMenuItem
+                  className={editorMenuItemClass}
+                  onSelect={() => setBlockType("paragraph")}
+                >
                   Paragraph
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setBlockType(1)}>
+                <DropdownMenuItem
+                  className={editorMenuItemClass}
+                  onSelect={() => setBlockType(1)}
+                >
                   Heading 1
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setBlockType(2)}>
+                <DropdownMenuItem
+                  className={editorMenuItemClass}
+                  onSelect={() => setBlockType(2)}
+                >
                   Heading 2
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setBlockType(3)}>
+                <DropdownMenuItem
+                  className={editorMenuItemClass}
+                  onSelect={() => setBlockType(3)}
+                >
                   Heading 3
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -750,9 +769,12 @@ export default function ArticleEditorForm({ article }) {
                   <ChevronDown className="size-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Insert</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className={editorMenuContentClass}>
+                <DropdownMenuLabel className={editorMenuLabelClass}>
+                  Insert
+                </DropdownMenuLabel>
                 <DropdownMenuItem
+                  className={editorMenuItemClass}
                   onSelect={(event) => {
                     event.preventDefault()
                     handleAddImageFromUrl()
@@ -762,6 +784,7 @@ export default function ArticleEditorForm({ article }) {
                   Image URL
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                  className={editorMenuItemClass}
                   onSelect={(event) => {
                     event.preventDefault()
                     imageUploadRef.current?.click()
@@ -771,6 +794,7 @@ export default function ArticleEditorForm({ article }) {
                   Upload image
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                  className={editorMenuItemClass}
                   onSelect={(event) => {
                     event.preventDefault()
                     editor
@@ -783,6 +807,7 @@ export default function ArticleEditorForm({ article }) {
                   Table
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                  className={editorMenuItemClass}
                   onSelect={(event) => {
                     event.preventDefault()
                     editor?.chain().focus().setHorizontalRule().run()
@@ -793,9 +818,12 @@ export default function ArticleEditorForm({ article }) {
 
                 {editor?.isActive("table") && (
                   <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel>Table</DropdownMenuLabel>
+                    <DropdownMenuSeparator className={editorMenuSeparatorClass} />
+                    <DropdownMenuLabel className={editorMenuLabelClass}>
+                      Table
+                    </DropdownMenuLabel>
                     <DropdownMenuItem
+                      className={editorMenuItemClass}
                       onSelect={(event) => {
                         event.preventDefault()
                         editor?.chain().focus().addRowBefore().run()
@@ -804,6 +832,7 @@ export default function ArticleEditorForm({ article }) {
                       Add row above
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className={editorMenuItemClass}
                       onSelect={(event) => {
                         event.preventDefault()
                         editor?.chain().focus().addRowAfter().run()
@@ -812,6 +841,7 @@ export default function ArticleEditorForm({ article }) {
                       Add row below
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className={editorMenuItemClass}
                       onSelect={(event) => {
                         event.preventDefault()
                         editor?.chain().focus().addColumnBefore().run()
@@ -820,6 +850,7 @@ export default function ArticleEditorForm({ article }) {
                       Add column left
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className={editorMenuItemClass}
                       onSelect={(event) => {
                         event.preventDefault()
                         editor?.chain().focus().addColumnAfter().run()
@@ -828,6 +859,7 @@ export default function ArticleEditorForm({ article }) {
                       Add column right
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className={editorMenuItemClass}
                       onSelect={(event) => {
                         event.preventDefault()
                         editor?.chain().focus().deleteRow().run()
@@ -836,6 +868,7 @@ export default function ArticleEditorForm({ article }) {
                       Delete row
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className={editorMenuItemClass}
                       onSelect={(event) => {
                         event.preventDefault()
                         editor?.chain().focus().deleteColumn().run()
@@ -844,6 +877,7 @@ export default function ArticleEditorForm({ article }) {
                       Delete column
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className={editorMenuItemClass}
                       onSelect={(event) => {
                         event.preventDefault()
                         editor?.chain().focus().deleteTable().run()

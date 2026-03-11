@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { canViewArticle } from "@/lib/article-access"
-import { requireAuthSession, ROLE_LABELS } from "@/lib/auth"
+import { requireAuthSession } from "@/lib/auth"
 import { getArticleById } from "@/lib/mockArticles"
 
 export default async function ArticleDetailPage({ params }) {
@@ -58,9 +58,6 @@ export default async function ArticleDetailPage({ params }) {
           </span>
           <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-medium">
             {article.readTime}
-          </span>
-          <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-medium">
-            Viewer: {ROLE_LABELS[viewer.role]}
           </span>
         </div>
 
