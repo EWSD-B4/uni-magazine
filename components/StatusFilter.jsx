@@ -1,0 +1,148 @@
+"use client";
+
+import * as React from "react";
+import { ChevronDown, CheckCircle2, Clock, XCircle, LayoutGrid } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+
+// ─── Status config ────────────────────────────────────────────────────────────
+const STATUS_OPTIONS = [
+  {
+    value: "All Statuses",
+    label: "All Statuses",
+    icon: LayoutGrid,
+    iconColor: "text-white",
+    count: null, // filled dynamically
+  },
+  {
+    value: "Approved",
+    label: "Approved",
+    icon: CheckCircle2,
+    iconColor: "text-[#016630]",
+    badgeClass: "bg-[#016630]/10 text-[#016630]",
+  },
+  {
+    value: "Pending",
+    label: "Pending",
+    icon: Clock,
+    iconColor: "text-[#B8860B]",
+    badgeClass: "bg-[#FFDF20]/20 text-[#B8860B]",
+  },
+  {
+    value: "Rejected",
+    label: "Rejected",
+    icon: XCircle,
+    iconColor: "text-[#9F0712]",
+    badgeClass: "bg-[#9F0712]/10 text-[#9F0712]",
+  },
+];
+
+// ─── Component ────────────────────────────────────────────────────────────────
+/**
+ * StatusFilterDropdown
+ *
+ * Props:
+ *   data          – full rows array (used to compute per-status counts)
+ *   statusKey     – key in each row that holds the status string (default: "statues")
+ *   value         – currently selected status string
+ *   onChange      – (statusString) => void
+ */
+export function StatusFilter({
+  data = [],
+  statusKey = "statues",
+  value = "All Statuses",
+  onChange,
+}) {
+  // Compute counts from data
+  const counts = React.useMemo(() => {
+    const map = { "All Statuses": data.length };
+    data.forEach((row) => {
+      const s = row[statusKey];
+      if (s) map[s] = (map[s] ?? 0) + 1;
+    });
+    return map;
+  }, [data, statusKey]);
+
+  const active = STATUS_OPTIONS.find((o) => o.value === value) ?? STATUS_OPTIONS[0];
+
+  return (
+    <DropdownMenu>
+      {/* ── Trigger ── */}
+      <DropdownMenuTrigger asChild>
+        <button
+          className={cn(
+            "inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold",
+            "bg-[#F26454] text-white shadow-sm",
+            "hover:bg-[#e0533f] active:bg-[#c94530]",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F26454]/60",
+            "transition-colors duration-150 select-none cursor-pointer"
+          )}
+        >
+          <active.icon className={cn("h-4 w-4", active.iconColor ?? "text-white")} />
+          {active.label}
+          <ChevronDown className="h-4 w-4 opacity-80" />
+        </button>
+      </DropdownMenuTrigger>
+
+      {/* ── Menu ── */}
+      <DropdownMenuContent
+        align="start"
+        sideOffset={6}
+        className="w-52 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg"
+      >
+        {STATUS_OPTIONS.map((option, idx) => {
+          const Icon = option.icon;
+          const count = counts[option.value] ?? 0;
+          const isSelected = value === option.value;
+          const isAll = option.value === "All Statuses";
+
+          return (
+            <React.Fragment key={option.value}>
+              {/* Separator before first real status */}
+              {idx === 1 && (
+                <DropdownMenuSeparator className="my-1 bg-slate-100" />
+              )}
+
+              <DropdownMenuItem
+                onSelect={() => onChange?.(option.value)}
+                className={cn(
+                  "flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm",
+                  "focus:bg-slate-50 focus:text-slate-900",
+                  isSelected && "bg-slate-50 font-semibold text-slate-900"
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <Icon
+                    className={cn(
+                      "h-4 w-4 shrink-0",
+                      isAll ? "text-slate-400" : option.iconColor
+                    )}
+                  />
+                  {option.label}
+                </span>
+
+                {/* Count badge */}
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 text-xs font-medium",
+                    isAll
+                      ? "bg-slate-100 text-slate-500"
+                      : option.badgeClass
+                  )}
+                >
+                  {count}
+                </span>
+              </DropdownMenuItem>
+            </React.Fragment>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
