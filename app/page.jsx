@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react"
 import Image from "next/image"
 
 export default function HomePage() {
-  const backgroundImage = '/home/home.png';
+  const backgroundImage = '/home/home.jpg';
 
   return (
     // <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_#fdfcfb,_#f4efe8_35%,_#eef2f6_75%)]">
