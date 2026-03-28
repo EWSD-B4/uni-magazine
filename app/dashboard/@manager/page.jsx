@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react"
-import { Header } from "@/components/Header"
 import { StatCard } from "@/components/StatCard"
 import { ContributionBarChart } from "@/components/ContributionBarChart"
 import { StatusCard } from "@/components/StatusCard"
@@ -86,11 +85,8 @@ export default function ManagerDashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = React.useState("This Semester")
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex">
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <Header userName="Yoh Yoh" />
-
         {/* Page Content */}
         <main className="flex-1 p-6 space-y-6">
           {/* Welcome */}

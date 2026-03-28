@@ -12,7 +12,7 @@ const STAT_ITEMS = [
 
 export default function StatisticsPage() {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fafc,_#eef2f6_60%,_#e2e8f0_100%)] px-6 py-12">
+    <div className="min-h-screen px-6 py-12">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>

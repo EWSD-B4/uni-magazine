@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { canViewArticle } from "@/lib/article-access"
-import { requireAuthSession, ROLE_LABELS } from "@/lib/auth"
+import { requireAuthSession } from "@/lib/auth"
 import { getArticleById } from "@/lib/mockArticles"
 
 export default async function ArticleDetailPage({ params }) {
@@ -25,7 +25,7 @@ export default async function ArticleDetailPage({ params }) {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#ffffff,_#f3f4f6_65%,_#e2e8f0_100%)] px-6 py-10">
+    <div className="min-h-screen px-6 py-10">
       <div className="mx-auto flex max-w-5xl flex-col gap-8">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-3">
@@ -58,9 +58,6 @@ export default async function ArticleDetailPage({ params }) {
           </span>
           <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-medium">
             {article.readTime}
-          </span>
-          <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-medium">
-            Viewer: {ROLE_LABELS[viewer.role]}
           </span>
         </div>
 

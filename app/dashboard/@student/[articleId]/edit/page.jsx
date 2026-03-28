@@ -34,7 +34,7 @@ export default async function StudentEditArticlePage({ params }) {
             Edit Your Article
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
-            Update copy, refine the excerpt, and preview the draft layout.
+            Update copy, refine the excerpt, and keep formatting consistent.
             Saving is intentionally disabled until a real backend is added.
           </p>
         </div>
