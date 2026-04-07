@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react"
-import { Header } from "@/components/Header"
 import { DeadlineCard } from "@/components/DeadLineCard"
 import { DataTable } from "@/components/DataTable"
 
@@ -68,14 +67,8 @@ export default function StudentDashboardPage() {
   return (
     <div className="flex min-h-screen">
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <Header userName="Yoh Yoh" />
-
         {/* Page Content */}
         <main className="flex-1 p-6 space-y-6">
-          {/* Welcome */}
-          <h1 className="text-3xl font-bold text-foreground mb-15">Welcome, Yoh Yoh</h1>
-
           {/* Individual Cards Demo */}
           <div className="w-full max-w-2xl space-y-4 mb-15 rounded-lg shadow-sm bg-white/80 p-6">
             <h3 className="text-2xl font-bold text-foreground mb-8">
