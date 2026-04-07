@@ -1,67 +1,13 @@
-// import { Button } from "@/components/ui/button"
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card"
-
-// export default function CoordinatorDashboardPage() {
-//   return (
-//     <div className="space-y-6">
-//       <div className="space-y-2">
-//         <h2 className="font-[var(--font-display)] text-2xl text-slate-900">
-//           Coordinator Review
-//         </h2>
-//         <p className="text-sm text-muted-foreground">
-//           Triage incoming submissions and assign editorial feedback.
-//         </p>
-//       </div>
-
-//       <div className="grid gap-4 md:grid-cols-2">
-//         <Card className="bg-white/80">
-//           <CardHeader className="space-y-2">
-//             <CardTitle className="text-base">Review queue</CardTitle>
-//             <CardDescription>New drafts awaiting first pass.</CardDescription>
-//           </CardHeader>
-//           <CardContent className="space-y-4 text-sm text-muted-foreground">
-//             <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3">
-//               12 submissions ready for review
-//             </div>
-//             <Button className="w-full">Open review board</Button>
-//           </CardContent>
-//         </Card>
-
-//         <Card className="bg-white/80">
-//           <CardHeader className="space-y-2">
-//             <CardTitle className="text-base">Faculty notes</CardTitle>
-//             <CardDescription>Priority guidance from managers.</CardDescription>
-//           </CardHeader>
-//           <CardContent className="space-y-2 text-sm text-muted-foreground">
-//             <p>• Highlight interdisciplinary stories</p>
-//             <p>• Ensure accessibility checks</p>
-//             <p>• Confirm interview permissions</p>
-//             <Button variant="secondary" className="mt-2 w-full">
-//               Share feedback
-//             </Button>
-//           </CardContent>
-//         </Card>
-//       </div>
-//     </div>
-//   )
-// }
-
 "use client";
 
 import * as React from "react";
-import { Header } from "@/components/Header";
 import { StatCard } from "@/components/StatCard";
 import { ContributionBarChart } from "@/components/ContributionBarChart";
 import { StatusCard } from "@/components/StatusCard";
 import { DataTable } from "@/components/DataTable";
 import { UrgentTasksBanner } from "@/components/UrgentTasksBanner";
 import { StatusFilter } from "@/components/StatusFilter";
+import { useRouter } from "next/navigation";
 
 // ─── Sample chart data ────────────────────────────────────────────────────────
 const chartData = [
@@ -144,19 +90,22 @@ const columns = [
   },
 ];
 
-const tableActions = [
-  { label: "View",    onClick: (row) => console.log("View", row) },
+export default function CoordinatorDashboardPage() {
+  const [selectedPeriod, setSelectedPeriod] = React.useState("This Week");
+  const router = useRouter();
+
+  const tableActions = [
+  { label: "View", onClick: (row) => {
+        router.push(`articles/market-lab-local-shops`);
+      }, 
+  },
   { label: "Comment", onClick: (row) => console.log("Comment", row) },
 ];
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-export default function CoordinatorDashboardPage() {
-  const [selectedPeriod, setSelectedPeriod] = React.useState("This Week");
-
-  // ── Status filter state ──
+  // Status filter state
   const [statusFilter, setStatusFilter] = React.useState("All Statuses");
 
-  // ── Derived filtered rows ──
+  // Derived filtered rows
   const filteredRows = React.useMemo(
     () =>
       statusFilter === "All Statuses"
@@ -168,15 +117,8 @@ export default function CoordinatorDashboardPage() {
   return (
     <div className="flex min-h-screen">
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <Header userName="Yoh Yoh" />
-
         {/* Page Content */}
         <main className="flex-1 p-6 space-y-6">
-          {/* Welcome */}
-          <h1 className="text-3xl font-bold text-foreground mb-15">
-            Welcome, Yoh Yoh
-          </h1>
 
           {/* 14-day deadline banner */}
           <UrgentTasksBanner
@@ -218,10 +160,10 @@ export default function CoordinatorDashboardPage() {
             {/* Section header + filter */}
             <div className="flex items-center justify-between">
               <h3 className="text-2xl font-bold text-foreground">
-                Selected Contributions
+                All Contributions
               </h3>
 
-              {/* 🔴 Status filter dropdown — connected to table data */}
+              {/* Status filter dropdown — connected to table data */}
               <StatusFilter
                 data={ALL_ROWS}
                 statusKey="statues"
