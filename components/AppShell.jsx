@@ -109,6 +109,10 @@ function isRouteActive(pathname, href) {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
+function isDashboardHome(pathname) {
+  return pathname === "/dashboard" || pathname === "/dashboard/"
+}
+
 function SidebarContent({
   collapsed,
   hasSession,
@@ -169,7 +173,7 @@ function SidebarContent({
           icon={LayoutGrid}
           label="Dashboard"
           collapsed={collapsed}
-          active={pathname.startsWith("/dashboard")}
+          active={isDashboardHome(pathname)}
           onNavigate={onNavigate}
         />
         <SidebarNavItem
