@@ -122,7 +122,13 @@ export default function AcademicYearPage() {
         },
         {
             label: "Close",
-            onClick: (row) => alert(`Close ${row.year}`)
+            onClick: (row) => {
+                // Find the row by ID and update only the status field
+                const updated = data.map((item) =>
+                    item.id === row.id ? { ...item, status: "Closed" } : item
+                )
+                setData(updated)
+            }
         },
         {
             label: "Delete",
