@@ -4,17 +4,20 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
+  Building2,
   ChevronLeft,
   CirclePlus,
+  GraduationCap,
   LayoutGrid,
   LogIn,
   LogOut,
   Menu,
   Newspaper,
+  UserCog,
   X,
 } from "lucide-react"
 
-import { logoutAction } from "@/lib/actions/guest.action"
+import { logoutAction } from "@/lib/actions/auth"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -31,11 +34,21 @@ function isLandingPath(pathname) {
 }
 
 function formatUserName(session) {
-  if (!session?.userId) {
+  if (session?.name) {
+    return session.name
+  }
+
+  if (session?.userName) {
+    return session.userName
+  }
+
+  const id = session?.id || session?.userId
+
+  if (!id) {
     return "Guest"
   }
 
-  return session.userId
+  return id
     .replace(/[-_]+/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase())
 }
@@ -65,9 +78,43 @@ function SidebarNavItem({
   )
 }
 
+function QuickActionButton({
+  href,
+  icon: Icon,
+  label,
+  active,
+  collapsed,
+  onNavigate,
+}) {
+  return (
+    <Button
+      asChild
+      variant="ghost"
+      className={cn(
+        "h-11 w-full justify-start gap-3 rounded-xl px-3 text-slate-200 hover:bg-slate-800/70 hover:text-white",
+        active && "bg-slate-800 text-white",
+        collapsed && "justify-center px-0"
+      )}
+    >
+      <Link href={href} onClick={onNavigate}>
+        <Icon className="size-4" />
+        {!collapsed ? label : null}
+      </Link>
+    </Button>
+  )
+}
+
+function isRouteActive(pathname, href) {
+  if (!pathname || !href) return false
+  return pathname === href || pathname.startsWith(`${href}/`)
+}
+
 function SidebarContent({
   collapsed,
   hasSession,
+  canCreateArticle,
+  createHref,
+  adminQuickLinks,
   pathname,
   userName,
   lastLoginLabel,
@@ -116,24 +163,7 @@ function SidebarContent({
         </div>
       ) : null}
 
-      <div className="mt-7">
-        <Button
-          asChild
-          className={cn(
-            "h-12 w-full rounded-full bg-slate-100 text-slate-900 hover:bg-slate-200",
-            collapsed && "justify-center rounded-xl px-0"
-          )}
-        >
-          <Link href={hasSession ? "/dashboard" : "/login"} onClick={onNavigate}>
-            <span className="grid size-7 place-items-center rounded-full bg-red-500 text-white">
-              <CirclePlus className="size-4" />
-            </span>
-            {!collapsed ? "Create new article" : null}
-          </Link>
-        </Button>
-      </div>
-
-      <nav className="mt-10 space-y-3">
+      <div className="mt-7 space-y-3">
         <SidebarNavItem
           href="/dashboard"
           icon={LayoutGrid}
@@ -150,7 +180,30 @@ function SidebarContent({
           active={pathname === "/articles"}
           onNavigate={onNavigate}
         />
-      </nav>
+
+        {canCreateArticle ? (
+          <QuickActionButton
+            href={hasSession ? createHref : "/login"}
+            icon={CirclePlus}
+            label="Create new article"
+            active={isRouteActive(pathname, createHref)}
+            collapsed={collapsed}
+            onNavigate={onNavigate}
+          />
+        ) : null}
+
+        {adminQuickLinks.map((item) => (
+          <QuickActionButton
+            key={item.href}
+            href={item.href}
+            icon={item.icon}
+            label={item.label}
+            active={isRouteActive(pathname, item.href)}
+            collapsed={collapsed}
+            onNavigate={onNavigate}
+          />
+        ))}
+      </div>
 
       <div className="mt-auto pt-6">
         {hasSession ? (
@@ -217,6 +270,29 @@ export default function AppShell({ children, session }) {
   }
 
   const hasSession = Boolean(session?.token)
+  const role = String(session?.role || "").toLowerCase()
+  const canCreateArticle = hasSession && role === "student"
+  const createHref = canCreateArticle ? "/dashboard/submit" : "/dashboard"
+  const adminQuickLinks =
+    hasSession && role === "admin"
+      ? [
+          {
+            href: "/dashboard/user-management",
+            label: "User Management",
+            icon: UserCog,
+          },
+          {
+            href: "/dashboard/academic-management",
+            label: "Academic Management",
+            icon: GraduationCap,
+          },
+          {
+            href: "/dashboard/faculty-management",
+            label: "Faculty Management",
+            icon: Building2,
+          },
+        ]
+      : []
   const userName = formatUserName(session)
 
   return (
@@ -239,6 +315,9 @@ export default function AppShell({ children, session }) {
         <SidebarContent
           collapsed={collapsed}
           hasSession={hasSession}
+          canCreateArticle={canCreateArticle}
+          createHref={createHref}
+          adminQuickLinks={adminQuickLinks}
           pathname={pathname}
           userName={userName}
           lastLoginLabel={lastLoginLabel}
@@ -291,6 +370,9 @@ export default function AppShell({ children, session }) {
           <SidebarContent
             collapsed={false}
             hasSession={hasSession}
+            canCreateArticle={canCreateArticle}
+            createHref={createHref}
+            adminQuickLinks={adminQuickLinks}
             pathname={pathname}
             userName={userName}
             lastLoginLabel={lastLoginLabel}
