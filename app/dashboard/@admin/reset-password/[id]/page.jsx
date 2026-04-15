@@ -40,7 +40,11 @@ export default function ResetPasswordPage() {
 
             <div className="mx-auto flex max-w-md flex-col items-center">
                 <div className="mb-4">
-                    <h1 className="text-lg font-semibold">Campus Mag</h1>
+                    <img
+                        src="/logo.png"
+                        alt="Campus Mag Logo"
+                        className="h-16 w-auto object-contain"
+                    />
                 </div>
 
                 <h1 className="mb-10 text-4xl font-bold text-black">Reset Password</h1>
