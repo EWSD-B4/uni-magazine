@@ -3,6 +3,14 @@ require("dotenv").config({ path: ".env.dev" })
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "uni-magazines.s3.ap-southeast-1.amazonaws.com",
+      },
+    ],
+  },
   turbopack: {
     root: path.join(__dirname),
   },

@@ -66,6 +66,18 @@ export default function StudentContributionSubmitForm({ deadlines }) {
   }, [imageItems]);
 
   React.useEffect(() => {
+    if (!imageInputRef.current) return;
+
+    const dataTransfer = new DataTransfer();
+    imageItems.forEach((item) => {
+      if (item?.file) {
+        dataTransfer.items.add(item.file);
+      }
+    });
+    imageInputRef.current.files = dataTransfer.files;
+  }, [imageItems]);
+
+  React.useEffect(() => {
     if (!submitState?.message) return;
 
     if (submitState.ok) {
