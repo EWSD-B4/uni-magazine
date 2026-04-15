@@ -20,6 +20,7 @@ import {
 import { logoutAction } from "@/lib/actions/auth"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 
 function isArticleDetailPath(pathname) {
   return /^\/articles\/[^/]+\/?$/.test(pathname || "")
@@ -148,11 +149,23 @@ function SidebarContent({
         <Link
           href="/"
           className={cn(
-            "text-5xl font-extrabold leading-none underline decoration-blue-500 decoration-3 underline-offset-4",
-            collapsed && "text-center text-2xl"
+            "flex items-center justify-center leading-none",
+            collapsed && "lex items-center justify-center"
           )}
         >
-          {collapsed ? "UM" : "Logo"}
+          {collapsed ? 
+            <Image
+              src="/logo_white_mobile.svg"
+              alt="Campus Mag"
+              width={100}
+              height={100}
+            /> : <Image
+              src="/logo_white.svg"
+              alt="Campus Mag"
+              width={150}
+              height={150}
+            />
+          }
         </Link>
       )}
 
@@ -340,7 +353,12 @@ export default function AppShell({ children, session }) {
           href="/"
           className="text-2xl font-extrabold leading-none underline decoration-blue-500 decoration-3 underline-offset-4"
         >
-          Logo
+          <Image
+            src="/logo_white.svg"
+            alt="Campus Mag"
+            width={100}
+            height={100}
+          />
         </Link>
         <div className="size-9" />
       </div>

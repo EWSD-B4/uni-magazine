@@ -5,6 +5,8 @@ import { StatCard } from "@/components/StatCard"
 import { ContributionBarChart } from "@/components/ContributionBarChart"
 import { StatusCard } from "@/components/StatusCard"
 import { DataTable } from "@/components/DataTable"
+import { useRouter } from "next/navigation";
+
 
 // Sample data for the chart
 const chartData = [
@@ -76,22 +78,26 @@ const columns = [
   },
 ]
 
-const tableActions = [
-  { label: "View", onClick: (row) => console.log("View", row) },
-  { label: "Download", onClick: (row) => console.log("Edit", row) },
-]
-
 export default function ManagerDashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = React.useState("This Semester")
+  const router = useRouter();
+
+  const tableActions = [
+    { 
+      label: "View",  
+      onClick: (row) => {
+        router.push(`articles/arts-after-hours`);
+      }, 
+    },
+    { label: "Download", onClick: (row) => console.log("Edit", row) },
+  ]
+
 
   return (
     <div className="flex">
       <div className="flex-1 flex flex-col">
         {/* Page Content */}
         <main className="flex-1 p-6 space-y-6">
-          {/* Welcome */}
-          <h1 className="text-3xl font-bold text-foreground mb-15">Welcome, Yoh Yoh</h1>
-
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard label="Total Contributions" value={1284} />
