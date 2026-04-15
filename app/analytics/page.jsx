@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react"
-import { Header } from "@/components/Header"
 import { MostViewedPage } from "@/components/MostViewedPage"
 import { MostActiveUsers } from "@/components/MostActiveUsers"
 import { BrowserUsageChart } from "@/components/BrowserUsageChart"
@@ -29,9 +28,6 @@ export default function SystemMonitoringDashboard() {
         <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
             <div className="flex min-h-screen">
                 <div className="flex-1 flex flex-col">
-                    {/* Header */}
-                    <Header userName="Yoh Yoh" />
-
                     <main className="flex-1 p-6 space-y-6">
                         {/* Welcome */}
                         <h1 className="text-3xl font-bold text-foreground mb-15">System Monitoring</h1>

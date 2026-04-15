@@ -20,6 +20,7 @@ import {
 import { logoutAction } from "@/lib/actions/auth"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 
 function isArticleDetailPath(pathname) {
   return /^\/articles\/[^/]+\/?$/.test(pathname || "")
@@ -109,12 +110,19 @@ function isRouteActive(pathname, href) {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
+function isDashboardHome(pathname) {
+  return pathname === "/dashboard" || pathname === "/dashboard/"
+}
+
 function SidebarContent({
   collapsed,
   hasSession,
+  logoHref,
   canCreateArticle,
   createHref,
   adminQuickLinks,
+  showDashboardNav,
+  showArticlesNav,
   pathname,
   userName,
   lastLoginLabel,
@@ -127,7 +135,7 @@ function SidebarContent({
       {mobile ? (
         <div className="flex items-center justify-between">
           <Link
-            href="/"
+            href={logoHref}
             onClick={onNavigate}
             className="text-4xl font-extrabold leading-none underline decoration-blue-500 decoration-3 underline-offset-4"
           >
@@ -146,13 +154,25 @@ function SidebarContent({
         </div>
       ) : (
         <Link
-          href="/"
+          href={logoHref}
           className={cn(
-            "text-5xl font-extrabold leading-none underline decoration-blue-500 decoration-3 underline-offset-4",
-            collapsed && "text-center text-2xl"
+            "flex items-center justify-center leading-none",
+            collapsed && "lex items-center justify-center"
           )}
         >
-          {collapsed ? "UM" : "Logo"}
+          {collapsed ? 
+            <Image
+              src="/logo_white_mobile.svg"
+              alt="Campus Mag"
+              width={100}
+              height={100}
+            /> : <Image
+              src="/logo_white.svg"
+              alt="Campus Mag"
+              width={150}
+              height={150}
+            />
+          }
         </Link>
       )}
 
@@ -164,22 +184,26 @@ function SidebarContent({
       ) : null}
 
       <div className="mt-7 space-y-3">
-        <SidebarNavItem
-          href="/dashboard"
-          icon={LayoutGrid}
-          label="Dashboard"
-          collapsed={collapsed}
-          active={pathname.startsWith("/dashboard")}
-          onNavigate={onNavigate}
-        />
-        <SidebarNavItem
-          href="/articles"
-          icon={Newspaper}
-          label="Articles"
-          collapsed={collapsed}
-          active={pathname === "/articles"}
-          onNavigate={onNavigate}
-        />
+        {showDashboardNav ? (
+          <SidebarNavItem
+            href="/dashboard"
+            icon={LayoutGrid}
+            label="Dashboard"
+            collapsed={collapsed}
+            active={isDashboardHome(pathname)}
+            onNavigate={onNavigate}
+          />
+        ) : null}
+        {showArticlesNav ? (
+          <SidebarNavItem
+            href="/articles"
+            icon={Newspaper}
+            label="Articles"
+            collapsed={collapsed}
+            active={pathname === "/articles"}
+            onNavigate={onNavigate}
+          />
+        ) : null}
 
         {canCreateArticle ? (
           <QuickActionButton
@@ -271,8 +295,12 @@ export default function AppShell({ children, session }) {
 
   const hasSession = Boolean(session?.token)
   const role = String(session?.role || "").toLowerCase()
+  const isGuest = hasSession && role === "guest"
   const canCreateArticle = hasSession && role === "student"
   const createHref = canCreateArticle ? "/dashboard/submit" : "/dashboard"
+  const showDashboardNav = !isGuest
+  const showArticlesNav = isGuest
+  const logoHref = hasSession ? (isGuest ? "/articles" : "/dashboard") : "/"
   const adminQuickLinks =
     hasSession && role === "admin"
       ? [
@@ -315,9 +343,12 @@ export default function AppShell({ children, session }) {
         <SidebarContent
           collapsed={collapsed}
           hasSession={hasSession}
+          logoHref={logoHref}
           canCreateArticle={canCreateArticle}
           createHref={createHref}
           adminQuickLinks={adminQuickLinks}
+          showDashboardNav={showDashboardNav}
+          showArticlesNav={showArticlesNav}
           pathname={pathname}
           userName={userName}
           lastLoginLabel={lastLoginLabel}
@@ -337,10 +368,15 @@ export default function AppShell({ children, session }) {
           <Menu className="size-5" />
         </Button>
         <Link
-          href="/"
+          href={logoHref}
           className="text-2xl font-extrabold leading-none underline decoration-blue-500 decoration-3 underline-offset-4"
         >
-          Logo
+          <Image
+            src="/logo_white.svg"
+            alt="Campus Mag"
+            width={100}
+            height={100}
+          />
         </Link>
         <div className="size-9" />
       </div>
@@ -370,9 +406,12 @@ export default function AppShell({ children, session }) {
           <SidebarContent
             collapsed={false}
             hasSession={hasSession}
+            logoHref={logoHref}
             canCreateArticle={canCreateArticle}
             createHref={createHref}
             adminQuickLinks={adminQuickLinks}
+            showDashboardNav={showDashboardNav}
+            showArticlesNav={showArticlesNav}
             pathname={pathname}
             userName={userName}
             lastLoginLabel={lastLoginLabel}

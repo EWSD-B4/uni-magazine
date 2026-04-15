@@ -1,13 +1,13 @@
 "use client";
-import { useState } from "react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff } from "lucide-react";
 import { loginAction } from "@/lib/actions/auth";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#d9d2c7]">
@@ -15,6 +15,12 @@ export default function LoginPage() {
         action={loginAction}
         className="flex flex-col items-center w-[380px] space-y-6"
       >
+        {error ? (
+          <p className="w-full rounded-md border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-700">
+            {error}
+          </p>
+        ) : null}
+
         {/* Logo */}
         <Image src="/logo.png" alt="Campus Mag" width={80} height={80} />
 
@@ -37,7 +43,7 @@ export default function LoginPage() {
 
           <Input
             name="password"
-            type={showPassword ? "text" : "password"}
+            type="password"
             placeholder="********"
             className="rounded-full bg-white/70 border-none h-12 px-5 pr-10"
             required

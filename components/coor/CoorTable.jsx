@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { StatCard } from "@/components/StatCard";
 import { ContributionBarChart } from "@/components/ContributionBarChart";
 import { StatusCard } from "@/components/StatusCard";
@@ -24,64 +25,53 @@ const articleStatuses = [
   { label: "Rejected", percentage: 14, color: "#9F0712" },
 ];
 
-const seedRows = [
-  {
-    id: 1,
-    title: "The Future of Technology",
-    statues: "Approved",
-    date: "Feb 07, 2026",
-  },
-  {
-    id: 2,
-    title: "The Future of Technology",
-    statues: "Approved",
-    date: "Feb 07, 2026",
-  },
-  {
-    id: 3,
-    title: "The Future of Arts",
-    statues: "Rejected",
-    date: "Feb 07, 2026",
-  },
-  {
-    id: 4,
-    title: "The Future of Physics",
-    statues: "Rejected",
-    date: "Feb 07, 2026",
-  },
-  {
-    id: 5,
-    title: "The Future of Maths",
-    statues: "Pending",
-    date: "Feb 07, 2026",
-  },
-  {
-    id: 6,
-    title: "The Future of English",
-    statues: "Pending",
-    date: "Feb 07, 2026",
-  },
-];
+function asString(value, fallback = "") {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  return fallback;
+}
 
-const generateRows = () => {
-  const titles = [
-    "The Future of Technology",
-    "The Future of Arts",
-    "The Future of Physics",
-    "The Future of Maths",
-    "The Future of English",
-    "The Future of Science",
+function normalizeStatus(value) {
+  const normalized = asString(value).toLowerCase();
+  if (normalized === "approved") return "Approved";
+  if (normalized === "rejected") return "Rejected";
+  if (normalized === "pending") return "Pending";
+  return "Pending";
+}
+
+function toDisplayDate(value) {
+  const raw = asString(value);
+  if (!raw) return "-";
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+function extractContributionList(payload) {
+  const source = payload?.data ?? payload;
+  const candidates = [
+    source?.contributions,
+    source?.items,
+    source?.list,
+    source,
   ];
-  const statuses = ["Approved", "Rejected", "Pending"];
-  return Array.from({ length: 122 }, (_, i) => ({
-    id: i + 7,
-    title: titles[i % titles.length],
-    statues: statuses[i % statuses.length],
-    date: "Feb 07, 2026",
-  }));
-};
+  return candidates.find((candidate) => Array.isArray(candidate)) || [];
+}
 
-const ALL_ROWS = [...seedRows, ...generateRows()];
+function normalizeContributionRow(item, index) {
+  return {
+    id: asString(item?.id ?? item?.contributionId ?? item?.articleId ?? index + 1),
+    title: asString(item?.title ?? item?.name ?? item?.articleTitle, "Untitled"),
+    statues: normalizeStatus(item?.status ?? item?.state),
+    date: toDisplayDate(
+      item?.submittedAt ?? item?.createdAt ?? item?.created_at ?? item?.date,
+    ),
+  };
+}
 
 const columns = [
   {
@@ -92,8 +82,13 @@ const columns = [
   {
     key: "title",
     header: "Title",
-    render: (value) => (
-      <span className="font-medium text-foreground">{String(value)}</span>
+    render: (value, row) => (
+      <Link
+        href={`/dashboard/${row.id}`}
+        className="font-medium text-foreground hover:underline"
+      >
+        {String(value)}
+      </Link>
     ),
   },
   {
@@ -127,26 +122,27 @@ const tableActions = [
   { label: "Comment", onClick: (row) => console.log("Comment", row) },
 ];
 
-export default function CoorTable() {
+export default function CoorTable({ contributionsPayload }) {
   const [selectedPeriod, setSelectedPeriod] = React.useState("This Week");
   const [statusFilter, setStatusFilter] = React.useState("All Statuses");
+
+  const allRows = React.useMemo(() => {
+    const list = extractContributionList(contributionsPayload);
+    return list.map((item, index) => normalizeContributionRow(item, index));
+  }, [contributionsPayload]);
 
   const filteredRows = React.useMemo(
     () =>
       statusFilter === "All Statuses"
-        ? ALL_ROWS
-        : ALL_ROWS.filter((row) => row.statues === statusFilter),
-    [statusFilter],
+        ? allRows
+        : allRows.filter((row) => row.statues === statusFilter),
+    [allRows, statusFilter],
   );
 
   return (
     <div className="flex min-h-screen">
       <div className="flex flex-1 flex-col">
         <main className="flex-1 space-y-6 p-6">
-          <h1 className="mb-15 text-3xl font-bold text-foreground">
-            Welcome, Yoh Yoh
-          </h1>
-
           <UrgentTasksBanner
             title="14-Day Review Deadline"
             buttonText="View Urgent Tasks"
@@ -155,9 +151,15 @@ export default function CoorTable() {
           />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Total Contributions" value={284} />
-            <StatCard label="Pending Reviews" value={12} />
-            <StatCard label="Selected Contributions" value={56} />
+            <StatCard label="Total Contributions" value={allRows.length} />
+            <StatCard
+              label="Pending Reviews"
+              value={allRows.filter((row) => row.statues === "Pending").length}
+            />
+            <StatCard
+              label="Selected Contributions"
+              value={allRows.filter((row) => row.statues === "Approved").length}
+            />
             <StatCard label="Total Guests" value={3} />
           </div>
 
@@ -185,7 +187,7 @@ export default function CoorTable() {
                 Selected Contributions
               </h3>
               <StatusFilter
-                data={ALL_ROWS}
+                data={allRows}
                 statusKey="statues"
                 value={statusFilter}
                 onChange={setStatusFilter}

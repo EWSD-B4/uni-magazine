@@ -1,6 +1,4 @@
-"use client"
-
-import Image from "next/image"
+"use client";
 
 import {
   Carousel,
@@ -8,22 +6,23 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel"
+} from "@/components/ui/carousel";
+import Image from "next/image";
 
 export default function ArticleCarousel({ images, title }) {
   return (
-    <Carousel className="w-full" opts={{ loop: true }}>
+    <Carousel className="mx-auto w-full max-w-[640px]" opts={{ loop: true }}>
       <CarouselContent>
         {images.map((image) => (
           <CarouselItem key={image.src}>
-            <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+            <div className="relative h-[220px] w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
               <Image
                 src={image.src}
                 alt={image.alt || `${title} image`}
-                fill
-                className="object-cover"
-                sizes="(min-width: 1024px) 960px, 100vw"
-                priority
+                width={500}
+                height={500}
+                className="w-full object-fill"
+                unoptimized
               />
             </div>
           </CarouselItem>
@@ -36,5 +35,5 @@ export default function ArticleCarousel({ images, title }) {
         </>
       ) : null}
     </Carousel>
-  )
+  );
 }

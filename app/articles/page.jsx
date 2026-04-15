@@ -1,22 +1,62 @@
-import Image from "next/image"
-import Link from "next/link"
+import Image from "next/image";
+import Link from "next/link";
 
-import { Button } from "@/components/ui/button"
+import { getContributionListing } from "@/lib/actions/contribution.action";
+import { requireAuthSession } from "@/lib/auth";
+import { asString, normalizeImages, unwrapPayload } from "@/lib/helpers/contribution";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { filterArticlesForViewer } from "@/lib/article-access"
-import { requireAuthSession } from "@/lib/auth"
-import { listArticles } from "@/lib/mockArticles"
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+
+const FALLBACK_IMAGE = "/article-images/campus-dawn.svg";
+
+function extractContributionList(payload) {
+  const source = unwrapPayload(payload);
+  const candidates = [
+    source?.contributions,
+    source?.items,
+    source?.list,
+    source,
+  ];
+
+  return candidates.find((candidate) => Array.isArray(candidate)) || [];
+}
+
+function toArticleCard(item, index) {
+  const title = asString(item?.title || item?.name, `Contribution ${index + 1}`);
+  const images = normalizeImages(item, title);
+  const firstImage = images[0];
+  const imageSrc = asString(firstImage?.src, FALLBACK_IMAGE);
+
+  return {
+    id: asString(item?.id ?? item?.contributionId ?? item?.articleId, `item-${index + 1}`),
+    title,
+    excerpt:
+      asString(item?.excerpt || item?.summary || item?.description) ||
+      "No summary provided.",
+    faculty: asString(item?.faculty, "N/A"),
+    section: asString(item?.section || item?.category, "N/A"),
+    author: asString(item?.author || item?.authorName || item?.name, "Unknown"),
+    readTime: asString(item?.readTime, "N/A"),
+    image: {
+      src: imageSrc,
+      alt: asString(firstImage?.alt, `${title} image`),
+    },
+  };
+}
 
 export default async function ArticlesPage() {
-  const viewer = await requireAuthSession()
-  const articles = filterArticlesForViewer(listArticles(), viewer)
+  await requireAuthSession();
+
+  const payload = await getContributionListing("student");
+  const rawList = extractContributionList(payload);
+  const articles = rawList.map((item, index) => toArticleCard(item, index));
 
   return (
     <div className="min-h-screen px-6 py-10">
@@ -59,13 +99,13 @@ export default async function ArticlesPage() {
             {articles.map((article, index) => (
               <Card
                 key={article.id}
-                className="overflow-hidden border-slate-200/80 bg-white/90 shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-700"
+                className="animate-in slide-in-from-bottom-4 overflow-hidden border-slate-200/80 bg-white/90 shadow-lg fade-in duration-700"
                 style={{ animationDelay: `${index * 80}ms` }}
               >
                 <div className="relative aspect-[16/10]">
                   <Image
-                    src={article.images[0].src}
-                    alt={article.images[0].alt}
+                    src={article.image.src}
+                    alt={article.image.alt}
                     fill
                     className="object-cover"
                     sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
@@ -102,13 +142,13 @@ export default async function ArticlesPage() {
             <CardHeader>
               <CardTitle>No articles in scope</CardTitle>
               <CardDescription>
-                This account does not currently have any mocked articles for the
-                selected faculty.
+                There are no contributions returned from student listing right
+                now.
               </CardDescription>
             </CardHeader>
           </Card>
         )}
       </div>
     </div>
-  )
+  );
 }

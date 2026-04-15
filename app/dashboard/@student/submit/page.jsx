@@ -1,13 +1,29 @@
 import { redirect } from "next/navigation"
 
 import StudentContributionSubmitForm from "@/components/StudentContributionSubmitForm"
+import SubmissionDeadlinesSection from "@/components/student/SubmissionDeadlinesSection"
 import { requireAuthSession } from "@/lib/auth"
+import { getCurrentAcademicYearDeadlines } from "@/lib/actions/student.action"
 
 export default async function StudentSubmitContributionPage() {
   const session = await requireAuthSession()
 
   if (session.role !== "student") {
     redirect("/dashboard")
+  }
+
+  let deadlines = {
+    closureDate: "",
+    closureFinalDate: "",
+  }
+
+  try {
+    deadlines = await getCurrentAcademicYearDeadlines()
+  } catch {
+    deadlines = {
+      closureDate: "",
+      closureFinalDate: "",
+    }
   }
 
   return (
@@ -25,6 +41,7 @@ export default async function StudentSubmitContributionPage() {
         </p>
       </header>
 
+      <SubmissionDeadlinesSection deadlines={deadlines} />
       <StudentContributionSubmitForm />
     </div>
   )

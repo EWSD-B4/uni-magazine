@@ -1,27 +1,83 @@
-import Link from "next/link"
-import { notFound } from "next/navigation"
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
-import ArticleEditorForm from "@/components/ArticleEditorForm"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { canEditArticle, canViewArticle } from "@/lib/article-access"
-import { requireAuthSession } from "@/lib/auth"
-import { getArticleById } from "@/lib/mockArticles"
+import StudentContributionEditForm from "@/components/student/StudentContributionEditForm";
+import SubmissionDeadlinesSection from "@/components/student/SubmissionDeadlinesSection";
+import { Button } from "@/components/ui/button";
+import { getCurrentAcademicYearDeadlines } from "@/lib/actions/student.action";
+import { getStudentContributionContentById } from "@/lib/actions/contribution.action";
+import { requireAuthSession } from "@/lib/auth";
+import { asString, unwrapPayload } from "@/lib/helpers/contribution";
+
+function normalizeUploadedImages(contribution, fallbackTitle) {
+  const documentEntry = Array.isArray(contribution?.documents)
+    ? contribution.documents[0]
+    : null;
+
+  const candidates = [
+    documentEntry?.uploadedImages,
+    contribution?.uploadedImages,
+    contribution?.images,
+    contribution?.photos,
+  ];
+  const list =
+    candidates.find((candidate) => Array.isArray(candidate) && candidate.length) ||
+    [];
+
+  return list
+    .map((item, index) => {
+      const src = asString(item?.url || item?.src || item?.path);
+      if (!src) return null;
+
+      return {
+        id: asString(item?._id || item?.id || item?.s3Key || `${index}`),
+        src,
+        alt: asString(item?.alt || item?.title, `${fallbackTitle} image ${index + 1}`),
+      };
+    })
+    .filter(Boolean);
+}
 
 export default async function StudentEditArticlePage({ params }) {
-  const viewer = await requireAuthSession()
-  const { articleId } = await params
-  const article = getArticleById(articleId)
-
-  if (!article || !canViewArticle(article, viewer) || !canEditArticle(article, viewer)) {
-    notFound()
+  const viewer = await requireAuthSession();
+  if (viewer.role !== "student") {
+    redirect("/dashboard");
   }
+
+  const { articleId } = await params;
+  const payload = await getStudentContributionContentById(articleId);
+  const contribution = unwrapPayload(payload);
+  const documentEntry = Array.isArray(contribution?.documents)
+    ? contribution.documents[0]
+    : null;
+  let deadlines = {
+    closureDate: "",
+    closureFinalDate: "",
+  };
+
+  try {
+    deadlines = await getCurrentAcademicYearDeadlines();
+  } catch {
+    deadlines = {
+      closureDate: "",
+      closureFinalDate: "",
+    };
+  }
+
+  const authorId = asString(contribution?.author?.id);
+  if (authorId && viewer.id && authorId !== asString(viewer.id)) {
+    redirect("/dashboard");
+  }
+
+  const title = asString(contribution?.title, `Contribution #${articleId}`);
+  const existingImages = normalizeUploadedImages(contribution, title);
+  const wordFileLabel = asString(
+    documentEntry?.originalFileName ||
+      documentEntry?.fileName ||
+      documentEntry?.filename ||
+      documentEntry?.name,
+    "Uploaded Word document",
+  );
 
   return (
     <div className="flex flex-col gap-8">
@@ -34,13 +90,12 @@ export default async function StudentEditArticlePage({ params }) {
             Edit Your Article
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
-            Update copy, refine the excerpt, and keep formatting consistent.
-            Saving is intentionally disabled until a real backend is added.
+            Update title, replace the Word file, and manage uploaded photos.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" asChild>
-            <Link href={`/articles/${article.id}`}>Back to detail</Link>
+            <Link href={`/dashboard/${articleId}`}>Back to detail</Link>
           </Button>
           <Button variant="ghost" asChild>
             <Link href="/dashboard">Student dashboard</Link>
@@ -48,28 +103,14 @@ export default async function StudentEditArticlePage({ params }) {
         </div>
       </header>
 
-      <Card className="border-slate-200/80 bg-amber-50/90 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base">Mock editor notice</CardTitle>
-          <CardDescription>
-            This editor is local-only and does not submit data anywhere. It
-            exists to model the student editing workflow without backend
-            assumptions.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-3 text-xs text-slate-600">
-            <span className="rounded-full border border-amber-200 bg-white px-3 py-1 font-medium">
-              Faculty: {article.faculty}
-            </span>
-            <span className="rounded-full border border-amber-200 bg-white px-3 py-1 font-medium">
-              Author: {article.author}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      <SubmissionDeadlinesSection deadlines={deadlines} />
 
-      <ArticleEditorForm article={article} />
+      <StudentContributionEditForm
+        contributionId={asString(contribution?.contributionId, articleId)}
+        initialTitle={title}
+        existingImages={existingImages}
+        wordFileLabel={wordFileLabel}
+      />
     </div>
-  )
+  );
 }
