@@ -83,7 +83,7 @@ export function DataTable({
     <div className="bg-card rounded-lg shadow-sm overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="bg-secondary hover:bg-secondary">
+          <TableRow className="bg-secondary hover:bg-secondary/50">
             {columns.map((column) => (
               <TableHead
                 key={String(column.key)}
@@ -151,11 +151,11 @@ export function DataTable({
         
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
+            variant="default"
             size="sm"
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className="gap-1"
+            className="gap-1 bg-[#F26454] hover:bg-[#F26454]/90"
           >
             <ChevronLeft className="size-4" />
             Back
@@ -173,7 +173,7 @@ export function DataTable({
                     onClick={() => goToPage(page)}
                     className={cn(
                       "size-8 rounded-full p-0",
-                      currentPage === page && "bg-primary hover:bg-primary/90"
+                      currentPage === page && "bg-[#F26454] hover:bg-[#F26454]/90"
                     )}
                   >
                     {page}
@@ -188,7 +188,7 @@ export function DataTable({
             size="sm"
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="gap-1 bg-primary hover:bg-primary/90"
+            className="gap-1 bg-[#F26454] hover:bg-[#F26454]/90"
           >
             Next
             <ChevronRight className="size-4" />
