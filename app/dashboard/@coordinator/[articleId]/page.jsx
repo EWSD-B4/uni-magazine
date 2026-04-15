@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import ArticleCarousel from "@/components/ArticleCarousel";
 import ArticleRichContent from "@/components/ArticleRichContent";
+import CoordinatorCommentSection from "@/components/coor/CoordinatorCommentSection";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -79,22 +80,15 @@ function normalizeComment(item, index) {
   };
 }
 
-export default async function StudentContributionDetailPage({ params }) {
+export default async function CoordinatorContributionDetailPage({ params }) {
   const viewer = await requireAuthSession();
-  if (viewer.role !== "student") {
+  if (viewer.role !== "coordinator") {
     redirect("/dashboard");
   }
 
   const { articleId } = await params;
-  const payload = await queryContributionById(articleId, "student");
+  const payload = await queryContributionById(articleId, "coordinator");
   const contribution = unwrapPayload(payload);
-  const contributionId = asString(
-    contribution?.contributionId || contribution?.id || articleId,
-  );
-  const commentsPayload = await getCommentsByContributionId(contributionId);
-  const comments = extractComments(commentsPayload)
-    .map((item, index) => normalizeComment(item, index))
-    .filter(Boolean);
   const documentEntry = Array.isArray(contribution?.documents)
     ? contribution.documents[0]
     : null;
@@ -102,7 +96,13 @@ export default async function StudentContributionDetailPage({ params }) {
   const metadata = documentEntry?.metadata || {};
 
   const title = asString(contribution?.title) || `Contribution #${articleId}`;
-  const excerpt = asString(contribution?.message) || "No summary provided.";
+  const excerpt =
+    asString(
+      contribution?.excerpt ||
+        contribution?.summary ||
+        contribution?.description ||
+        contribution?.message,
+    ) || "No summary provided.";
   const faculty =
     asString(contribution?.faculty?.facultyName || contribution?.faculty) || "N/A";
   const facultyCode = asString(contribution?.faculty?.facultyCode);
@@ -130,6 +130,9 @@ export default async function StudentContributionDetailPage({ params }) {
         contribution?.publishDate ||
         contribution?.createdAt,
     ) || "N/A";
+  const contributionId = asString(
+    contribution?.contributionId || contribution?.id || articleId,
+  );
   const images = normalizeImages(
     {
       ...contribution,
@@ -137,13 +140,17 @@ export default async function StudentContributionDetailPage({ params }) {
     },
     title,
   );
+  const commentsPayload = await getCommentsByContributionId(contributionId);
+  const comments = extractComments(commentsPayload)
+    .map((item, index) => normalizeComment(item, index))
+    .filter(Boolean);
 
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-            Student Contribution
+            Coordinator Contribution Review
           </p>
           <h1 className="font-[var(--font-display)] text-4xl leading-tight text-slate-900">
             {title}
@@ -156,15 +163,8 @@ export default async function StudentContributionDetailPage({ params }) {
           <Button variant="outline" asChild>
             <Link href="/dashboard">Back to dashboard</Link>
           </Button>
-          {comments.length ? (
-            <Button variant="ghost" asChild>
-              <Link href="#coordinator-comments">
-                View coordinator comments ({comments.length})
-              </Link>
-            </Button>
-          ) : null}
-          <Button asChild>
-            <Link href={`/dashboard/${articleId}/edit`}>Edit article</Link>
+          <Button variant="ghost" asChild>
+            <Link href="/articles">Article list</Link>
           </Button>
         </div>
       </header>
@@ -201,32 +201,11 @@ export default async function StudentContributionDetailPage({ params }) {
         </CardContent>
       </Card>
 
-      {comments.length ? (
-        <Card
-          id="coordinator-comments"
-          className="border-slate-200/80 bg-white/95 shadow-lg"
-        >
-          <CardHeader>
-            <CardTitle className="text-xl">Coordinator Comments</CardTitle>
-            <CardDescription>
-              Feedback linked to this contribution.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {comments.map((comment) => (
-              <div
-                key={comment.id}
-                className="rounded-lg border border-slate-200 bg-slate-50/80 p-4"
-              >
-                <p className="text-sm leading-6 text-slate-700">{comment.body}</p>
-                <p className="mt-2 text-xs text-slate-500">
-                  {comment.author} • {comment.date}
-                </p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : null}
+      <CoordinatorCommentSection
+        initialComments={comments}
+        coordinatorName={viewer.name || "Coordinator"}
+        contributionId={contributionId}
+      />
     </div>
   );
 }

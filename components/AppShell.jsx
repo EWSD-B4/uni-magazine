@@ -117,9 +117,12 @@ function isDashboardHome(pathname) {
 function SidebarContent({
   collapsed,
   hasSession,
+  logoHref,
   canCreateArticle,
   createHref,
   adminQuickLinks,
+  showDashboardNav,
+  showArticlesNav,
   pathname,
   userName,
   lastLoginLabel,
@@ -132,7 +135,7 @@ function SidebarContent({
       {mobile ? (
         <div className="flex items-center justify-between">
           <Link
-            href="/"
+            href={logoHref}
             onClick={onNavigate}
             className="text-4xl font-extrabold leading-none underline decoration-blue-500 decoration-3 underline-offset-4"
           >
@@ -151,7 +154,7 @@ function SidebarContent({
         </div>
       ) : (
         <Link
-          href="/"
+          href={logoHref}
           className={cn(
             "flex items-center justify-center leading-none",
             collapsed && "lex items-center justify-center"
@@ -181,22 +184,26 @@ function SidebarContent({
       ) : null}
 
       <div className="mt-7 space-y-3">
-        <SidebarNavItem
-          href="/dashboard"
-          icon={LayoutGrid}
-          label="Dashboard"
-          collapsed={collapsed}
-          active={isDashboardHome(pathname)}
-          onNavigate={onNavigate}
-        />
-        <SidebarNavItem
-          href="/articles"
-          icon={Newspaper}
-          label="Articles"
-          collapsed={collapsed}
-          active={pathname === "/articles"}
-          onNavigate={onNavigate}
-        />
+        {showDashboardNav ? (
+          <SidebarNavItem
+            href="/dashboard"
+            icon={LayoutGrid}
+            label="Dashboard"
+            collapsed={collapsed}
+            active={isDashboardHome(pathname)}
+            onNavigate={onNavigate}
+          />
+        ) : null}
+        {showArticlesNav ? (
+          <SidebarNavItem
+            href="/articles"
+            icon={Newspaper}
+            label="Articles"
+            collapsed={collapsed}
+            active={pathname === "/articles"}
+            onNavigate={onNavigate}
+          />
+        ) : null}
 
         {canCreateArticle ? (
           <QuickActionButton
@@ -288,8 +295,12 @@ export default function AppShell({ children, session }) {
 
   const hasSession = Boolean(session?.token)
   const role = String(session?.role || "").toLowerCase()
+  const isGuest = hasSession && role === "guest"
   const canCreateArticle = hasSession && role === "student"
   const createHref = canCreateArticle ? "/dashboard/submit" : "/dashboard"
+  const showDashboardNav = !isGuest
+  const showArticlesNav = isGuest
+  const logoHref = hasSession ? (isGuest ? "/articles" : "/dashboard") : "/"
   const adminQuickLinks =
     hasSession && role === "admin"
       ? [
@@ -332,9 +343,12 @@ export default function AppShell({ children, session }) {
         <SidebarContent
           collapsed={collapsed}
           hasSession={hasSession}
+          logoHref={logoHref}
           canCreateArticle={canCreateArticle}
           createHref={createHref}
           adminQuickLinks={adminQuickLinks}
+          showDashboardNav={showDashboardNav}
+          showArticlesNav={showArticlesNav}
           pathname={pathname}
           userName={userName}
           lastLoginLabel={lastLoginLabel}
@@ -354,7 +368,7 @@ export default function AppShell({ children, session }) {
           <Menu className="size-5" />
         </Button>
         <Link
-          href="/"
+          href={logoHref}
           className="text-2xl font-extrabold leading-none underline decoration-blue-500 decoration-3 underline-offset-4"
         >
           <Image
@@ -392,9 +406,12 @@ export default function AppShell({ children, session }) {
           <SidebarContent
             collapsed={false}
             hasSession={hasSession}
+            logoHref={logoHref}
             canCreateArticle={canCreateArticle}
             createHref={createHref}
             adminQuickLinks={adminQuickLinks}
+            showDashboardNav={showDashboardNav}
+            showArticlesNav={showArticlesNav}
             pathname={pathname}
             userName={userName}
             lastLoginLabel={lastLoginLabel}

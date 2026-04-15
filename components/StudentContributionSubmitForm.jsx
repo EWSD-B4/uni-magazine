@@ -31,19 +31,7 @@ function isValidImage(file) {
   );
 }
 
-function formatDeadline(value) {
-  if (!value) return "Not available";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date);
-}
-
-export default function StudentContributionSubmitForm({ deadlines }) {
+export default function StudentContributionSubmitForm() {
   const [title, setTitle] = React.useState("");
   const [wordFile, setWordFile] = React.useState(null);
   const [imageItems, setImageItems] = React.useState([]);
@@ -191,16 +179,6 @@ export default function StudentContributionSubmitForm({ deadlines }) {
       onSubmit={handleClientValidate}
       className="space-y-5"
     >
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span className="rounded-full border bg-white px-3 py-1 font-medium">
-          1st deadline (closureDate): {formatDeadline(deadlines?.closureDate)}
-        </span>
-        <span className="rounded-full border bg-white px-3 py-1 font-medium">
-          2nd deadline (closureFinalDate):{" "}
-          {formatDeadline(deadlines?.closureFinalDate)}
-        </span>
-      </div>
-
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span className="rounded-full border bg-white px-3 py-1 font-medium">
           One Word file is required

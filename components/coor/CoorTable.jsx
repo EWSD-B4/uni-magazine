@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { StatCard } from "@/components/StatCard";
 import { ContributionBarChart } from "@/components/ContributionBarChart";
 import { StatusCard } from "@/components/StatusCard";
@@ -81,8 +82,13 @@ const columns = [
   {
     key: "title",
     header: "Title",
-    render: (value) => (
-      <span className="font-medium text-foreground">{String(value)}</span>
+    render: (value, row) => (
+      <Link
+        href={`/dashboard/${row.id}`}
+        className="font-medium text-foreground hover:underline"
+      >
+        {String(value)}
+      </Link>
     ),
   },
   {
@@ -137,10 +143,6 @@ export default function CoorTable({ contributionsPayload }) {
     <div className="flex min-h-screen">
       <div className="flex flex-1 flex-col">
         <main className="flex-1 space-y-6 p-6">
-          <h1 className="mb-15 text-3xl font-bold text-foreground">
-            Welcome, Yoh Yoh
-          </h1>
-
           <UrgentTasksBanner
             title="14-Day Review Deadline"
             buttonText="View Urgent Tasks"
