@@ -137,9 +137,14 @@ function SidebarContent({
           <Link
             href={logoHref}
             onClick={onNavigate}
-            className="text-4xl font-extrabold leading-none underline decoration-blue-500 decoration-3 underline-offset-4"
+            className="leading-none ml-5"
           >
-            Logo
+            <Image
+              src="/logo_white.svg"
+              alt="Campus Mag"
+              width={150}
+              height={150}
+            />
           </Link>
           <Button
             type="button"

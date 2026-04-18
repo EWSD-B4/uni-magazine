@@ -12,14 +12,14 @@ export default function HomePage() {
       <header className="w-full backdrop-blur-sm bg-[#EFE9E1]">
         <div className="container mx-auto flex items-center justify-between px-6 py-3">
           <div>
-            <h1>
+            <Link href="/">
               <Image
                 src="/logo_black.svg"
                 alt="Campus Mag"
                 width={100}
                 height={100}
               />
-            </h1>
+            </Link>
           </div>
           
           <Button asChild
@@ -54,14 +54,14 @@ export default function HomePage() {
             
             <div className="flex flex-wrap gap-4">
               <Button className="group gap-2 rounded-full px-10 py-6 text-base whitespace-nowrap bg-[#F26454]">
-                <Link href="/" className="text-white">
+                <Link href="/login" className="text-white">
                   Submit Article
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 inline-block ml-2 text-white" />
                 </Link>
               </Button>
               
               <Button variant="outline" className="rounded-full border-2 border-white bg-transparent px-10 py-6 text-base text-white hover:bg-white/10 hover:text-white">
-                <Link href="/">Explore</Link>
+                <Link href="/login">Explore</Link>
               </Button>
             </div>
           </div>
