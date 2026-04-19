@@ -1,7 +1,5 @@
-import { redirect } from "next/navigation";
-
 import ManagerDashboardClient from "@/components/manager/ManagerDashboardClient";
-import { getContributionListing } from "@/lib/actions/contribution.action";
+import { getManagerSelectedContributionListing } from "@/lib/actions/contribution.action";
 import { requireAuthSession } from "@/lib/auth";
 import { unwrapPayload } from "@/lib/helpers/contribution";
 
@@ -44,6 +42,9 @@ function extractContributionList(payload) {
   const source = unwrapPayload(payload);
   const candidates = [
     source?.contributions,
+    source?.selectedContributions,
+    source?.selected,
+    source?.approvedContributions,
     source?.contributionList,
     source?.rows,
     source?.items,
@@ -54,6 +55,44 @@ function extractContributionList(payload) {
   ];
   const direct = candidates.find((candidate) => Array.isArray(candidate));
   if (direct) return direct;
+
+  if (
+    source &&
+    typeof source === "object" &&
+    (source.title || source.id || source.contributionId || source.articleId)
+  ) {
+    return [source];
+  }
+
+  const visited = new Set();
+  const queue = [source];
+
+  while (queue.length) {
+    const current = queue.shift();
+    if (!current || typeof current !== "object") continue;
+    if (visited.has(current)) continue;
+    visited.add(current);
+
+    if (Array.isArray(current)) {
+      const records = current.filter((item) => item && typeof item === "object");
+      if (
+        records.some(
+          (item) => item.title || item.id || item.contributionId || item.articleId,
+        )
+      ) {
+        return records;
+      }
+      records.forEach((item) => queue.push(item));
+      continue;
+    }
+
+    Object.values(current).forEach((value) => {
+      if (value && typeof value === "object") {
+        queue.push(value);
+      }
+    });
+  }
+
   return [];
 }
 
@@ -114,35 +153,40 @@ function buildStatusData(rows) {
 export default async function ManagerDashboardPage() {
   const viewer = await requireAuthSession();
   if (viewer.role !== "manager") {
-    redirect("/dashboard");
+    return null;
   }
 
-  const payloadResult = await Promise.allSettled([getContributionListing("manager")]);
-  const payload =
+  const payloadResult = await Promise.allSettled([
+    getManagerSelectedContributionListing(),
+  ]);
+  const selectedPayload =
     payloadResult[0].status === "fulfilled" ? payloadResult[0].value : null;
-  const loadError =
-    payloadResult[0].status === "rejected"
-      ? payloadResult[0].reason instanceof Error
-        ? payloadResult[0].reason.message
-        : "Failed to load manager contributions."
-      : "";
 
-  const rows = extractContributionList(payload).map((item, index) =>
+  const loadErrors = [];
+  if (payloadResult[0].status === "rejected") {
+    loadErrors.push(
+      payloadResult[0].reason instanceof Error
+        ? payloadResult[0].reason.message
+        : "Failed to load manager selected contributions.",
+    );
+  }
+
+  const tableRows = extractContributionList(selectedPayload).map((item, index) =>
     normalizeContributionRow(item, index),
   );
 
   return (
     <ManagerDashboardClient
-      rows={rows}
-      chartData={buildChartData(rows)}
-      articleStatuses={buildStatusData(rows)}
+      rows={tableRows}
+      chartData={buildChartData(tableRows)}
+      articleStatuses={buildStatusData(tableRows)}
       stats={{
-        totalContributions: rows.length,
-        pendingReviews: rows.filter((row) => row.status === "Pending").length,
-        selectedContributions: rows.filter((row) => row.status === "Approved").length,
-        totalFaculties: new Set(rows.map((row) => row.faculty)).size,
+        totalContributions: tableRows.length,
+        pendingReviews: tableRows.filter((row) => row.status === "Pending").length,
+        selectedContributions: tableRows.filter((row) => row.status === "Approved").length,
+        totalFaculties: new Set(tableRows.map((row) => row.faculty)).size,
       }}
-      loadError={loadError}
+      loadError={loadErrors.join(" ")}
     />
   );
 }

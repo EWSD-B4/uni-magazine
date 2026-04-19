@@ -2,8 +2,7 @@ import Link from "next/link";
 
 import ArticleCarousel from "@/components/ArticleCarousel";
 import ArticleRichContent from "@/components/ArticleRichContent";
-import CoordinatorCommentSection from "@/components/coor/CoordinatorCommentSection";
-import CoordinatorContributionDecisionButtons from "@/components/coor/CoordinatorContributionDecisionButtons";
+import ManagerSelectedDownloadButton from "@/components/manager/ManagerSelectedDownloadButton";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,10 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  getCommentsByContributionId,
-  queryContributionById,
-} from "@/lib/actions/contribution.action";
+import { getContributionById } from "@/lib/actions/contribution.action";
 import { requireAuthSession } from "@/lib/auth";
 import {
   asString,
@@ -24,70 +20,14 @@ import {
   unwrapPayload,
 } from "@/lib/helpers/contribution";
 
-function extractComments(payload) {
-  const source = unwrapPayload(payload);
-  const candidates = [
-    source?.comments,
-    source?.items,
-    source?.list,
-    source?.rows,
-    source?.data,
-    source,
-  ];
-  const direct = candidates.find((candidate) => Array.isArray(candidate));
-  if (direct) return direct;
-
-  if (
-    source &&
-    typeof source === "object" &&
-    (source.comment || source.content || source.message || source.text)
-  ) {
-    return [source];
-  }
-
-  return [];
-}
-
-function toReadableDate(value) {
-  const raw = asString(value);
-  if (!raw) return "N/A";
-  const date = new Date(raw);
-  if (Number.isNaN(date.getTime())) return raw;
-  return date.toISOString();
-}
-
-function normalizeComment(item, index) {
-  const body = asString(
-    item?.comment || item?.content || item?.message || item?.text,
-  );
-  if (!body) return null;
-
-  return {
-    id: asString(item?.id || item?._id || item?.commentId, `${index + 1}`),
-    body,
-    author: asString(
-      item?.author?.name ||
-        item?.user?.name ||
-        item?.createdBy?.name ||
-        item?.coordinator?.name ||
-        item?.author ||
-        item?.name,
-      "Coordinator",
-    ),
-    date: toReadableDate(
-      item?.createdAt || item?.updatedAt || item?.timestamp || item?.date,
-    ),
-  };
-}
-
-export default async function CoordinatorContributionDetailPage({ params }) {
+export default async function ManagerContributionDetailPage({ params }) {
   const viewer = await requireAuthSession();
-  if (viewer.role !== "coordinator") {
+  if (viewer.role !== "manager") {
     return null;
   }
 
   const { articleId } = await params;
-  const payload = await queryContributionById(articleId, "coordinator");
+  const payload = await getContributionById(articleId, viewer.token);
   const contribution = unwrapPayload(payload);
   const documentEntry = Array.isArray(contribution?.documents)
     ? contribution.documents[0]
@@ -130,9 +70,6 @@ export default async function CoordinatorContributionDetailPage({ params }) {
         contribution?.publishDate ||
         contribution?.createdAt,
     ) || "N/A";
-  const contributionId = asString(
-    contribution?.contributionId || contribution?.id || articleId,
-  );
   const images = normalizeImages(
     {
       ...contribution,
@@ -140,17 +77,13 @@ export default async function CoordinatorContributionDetailPage({ params }) {
     },
     title,
   );
-  const commentsPayload = await getCommentsByContributionId(contributionId);
-  const comments = extractComments(commentsPayload)
-    .map((item, index) => normalizeComment(item, index))
-    .filter(Boolean);
 
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-            Coordinator Contribution Review
+            Manager Contribution View
           </p>
           <h1 className="font-[var(--font-display)] text-4xl leading-tight text-slate-900">
             {title}
@@ -163,9 +96,7 @@ export default async function CoordinatorContributionDetailPage({ params }) {
           <Button variant="outline" asChild>
             <Link href="/dashboard">Back to dashboard</Link>
           </Button>
-          <Button variant="ghost" asChild>
-            <Link href="/articles">Article list</Link>
-          </Button>
+          <ManagerSelectedDownloadButton />
         </div>
       </header>
 
@@ -186,12 +117,6 @@ export default async function CoordinatorContributionDetailPage({ params }) {
         ) : null}
       </div>
 
-      <CoordinatorContributionDecisionButtons
-        contributionId={contributionId}
-        currentStatus={asString(contribution?.status || contribution?.state)}
-        returnPath={`/dashboard/${articleId}`}
-      />
-
       {images.length ? <ArticleCarousel images={images} title={title} /> : null}
 
       <Card className="border-slate-200/80 bg-white/95 shadow-lg">
@@ -206,12 +131,6 @@ export default async function CoordinatorContributionDetailPage({ params }) {
           <ArticleRichContent source={{ ...contribution, content: docContent }} />
         </CardContent>
       </Card>
-
-      <CoordinatorCommentSection
-        initialComments={comments}
-        coordinatorName={viewer.name || "Coordinator"}
-        contributionId={contributionId}
-      />
     </div>
   );
 }

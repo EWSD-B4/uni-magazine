@@ -30,7 +30,7 @@ function isImageFile(file) {
 function isWordFile(file) {
   if (!file) return false;
   const name = asString(file.name).toLowerCase();
-  return name.endsWith(".doc") || name.endsWith(".docx");
+  return name.endsWith(".docx");
 }
 
 const INITIAL_EDIT_STATE = {
@@ -114,7 +114,7 @@ export default function StudentContributionEditForm({
 
     if (!isWordFile(file)) {
       setNewWordFile(null);
-      setErrorMessage("Word file must be .doc or .docx.");
+      setErrorMessage("Word file must be .docx.");
       event.target.value = "";
       return;
     }
@@ -212,7 +212,7 @@ export default function StudentContributionEditForm({
             id="replace-docx"
             name="docx"
             type="file"
-            accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onChange={handleWordFileChange}
             disabled={isPending}
             className="bg-background file:mr-3 file:rounded-full file:border-0 file:bg-red-500 file:px-4 file:py-2 file:text-white hover:file:bg-red-600"
@@ -232,7 +232,7 @@ export default function StudentContributionEditForm({
           <Input
             id="new-photos"
             ref={photosInputRef}
-            name="photos"
+            name="images"
             type="file"
             multiple
             accept=".jpg,.jpeg,.png,image/jpeg,image/png"

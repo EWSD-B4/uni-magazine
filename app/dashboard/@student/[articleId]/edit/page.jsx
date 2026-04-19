@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
 
 import StudentContributionEditForm from "@/components/student/StudentContributionEditForm";
 import SubmissionDeadlinesSection from "@/components/student/SubmissionDeadlinesSection";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { getCurrentAcademicYearDeadlines } from "@/lib/actions/student.action";
 import { getStudentContributionContentById } from "@/lib/actions/contribution.action";
 import { requireAuthSession } from "@/lib/auth";
+import { isDeadlinePassed } from "@/lib/helpers/deadline";
 import { asString, unwrapPayload } from "@/lib/helpers/contribution";
 
 function normalizeUploadedImages(contribution, fallbackTitle) {
@@ -38,10 +40,23 @@ function normalizeUploadedImages(contribution, fallbackTitle) {
     .filter(Boolean);
 }
 
+function toReadableDeadline(value) {
+  const raw = asString(value);
+  if (!raw) return "N/A";
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
 export default async function StudentEditArticlePage({ params }) {
+  noStore();
   const viewer = await requireAuthSession();
   if (viewer.role !== "student") {
-    redirect("/dashboard");
+    return null;
   }
 
   const { articleId } = await params;
@@ -78,6 +93,7 @@ export default async function StudentEditArticlePage({ params }) {
       documentEntry?.name,
     "Uploaded Word document",
   );
+  const isEditLocked = isDeadlinePassed(deadlines?.closureFinalDate);
 
   return (
     <div className="flex flex-col gap-8">
@@ -105,12 +121,18 @@ export default async function StudentEditArticlePage({ params }) {
 
       <SubmissionDeadlinesSection deadlines={deadlines} />
 
-      <StudentContributionEditForm
-        contributionId={asString(contribution?.contributionId, articleId)}
-        initialTitle={title}
-        existingImages={existingImages}
-        wordFileLabel={wordFileLabel}
-      />
+      {isEditLocked ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900">
+          Final edit deadline has passed ({toReadableDeadline(deadlines?.closureFinalDate)}). This article can no longer be updated.
+        </div>
+      ) : (
+        <StudentContributionEditForm
+          contributionId={asString(contribution?.contributionId, articleId)}
+          initialTitle={title}
+          existingImages={existingImages}
+          wordFileLabel={wordFileLabel}
+        />
+      )}
     </div>
   );
 }

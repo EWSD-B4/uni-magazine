@@ -19,7 +19,7 @@ function isWordFile(file) {
   if (!file) return false;
 
   const lower = file.name.toLowerCase();
-  return lower.endsWith(".doc") || lower.endsWith(".docx");
+  return lower.endsWith(".docx");
 }
 
 function isValidImage(file) {
@@ -96,7 +96,7 @@ export default function StudentContributionSubmitForm() {
 
     if (!isWordFile(file)) {
       setWordFile(null);
-      setErrorMessage("Word file must be .doc or .docx");
+      setErrorMessage("Word file must be .docx");
       event.target.value = "";
       return;
     }
@@ -170,6 +170,7 @@ export default function StudentContributionSubmitForm() {
     if (!agreed) {
       event.preventDefault();
       setErrorMessage("Please agree to Terms & Conditions.");
+      return;
     }
   }
 
@@ -219,12 +220,12 @@ export default function StudentContributionSubmitForm() {
                 ref={wordInputRef}
                 name="wordFile"
                 type="file"
-                accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 onChange={handleWordFileChange}
                 disabled={isPending}
                 className="block w-full text-sm file:mr-3 file:rounded-full file:border-0 file:bg-red-500 file:px-4 file:py-2 file:text-white hover:file:bg-red-600 disabled:opacity-60"
               />
-              <p className="text-xs text-slate-500">Allowed: .doc, .docx</p>
+              <p className="text-xs text-slate-500">Allowed: .docx</p>
               {wordFile ? (
                 <p className="text-sm font-medium text-slate-700">
                   {wordFile.name}
@@ -243,7 +244,7 @@ export default function StudentContributionSubmitForm() {
               <p className="font-medium">Upload Photos (optional)</p>
               <input
                 ref={imageInputRef}
-                name="photos"
+                name="images"
                 type="file"
                 multiple
                 accept=".jpg,.jpeg,.png,image/jpeg,image/png"
