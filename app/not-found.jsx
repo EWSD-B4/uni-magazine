@@ -21,7 +21,7 @@ export default function NotFound() {
 
                 {/* Description */}
                 <p className="text-gray-500 max-w-md mx-auto">
-                    The page you're looking for might have been removed,
+                    The page you&apos;re looking for might have been removed,
                     renamed, or is temporarily unavailable.
                 </p>
 

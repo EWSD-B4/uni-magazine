@@ -39,7 +39,10 @@ function uniqueSorted(values) {
 
 export default function UserTable({ initialUsers = [], faculties = [] }) {
   const router = useRouter();
-  const [users, setUsers] = useState(initialUsers);
+  const users = useMemo(
+    () => (Array.isArray(initialUsers) ? initialUsers : []),
+    [initialUsers],
+  );
   const [selectedRole, setSelectedRole] = useState("All Roles");
   const [selectedFaculty, setSelectedFaculty] = useState("All Faculties");
 
@@ -48,17 +51,13 @@ export default function UserTable({ initialUsers = [], faculties = [] }) {
     [users],
   );
   const facultyOptions = useMemo(() => {
-    const fromApi = uniqueSorted(
+    const fromApiOnly = uniqueSorted(
       faculties.map((faculty) =>
         typeof faculty === "string" ? faculty : faculty?.name,
       ),
     );
-    const fromUsers = uniqueSorted(users.map((user) => user.faculty));
-    const merged = fromApi.length
-      ? [...new Set([...fromApi, ...fromUsers])]
-      : fromUsers;
-    return ["All Faculties", ...merged];
-  }, [faculties, users]);
+    return ["All Faculties", ...fromApiOnly];
+  }, [faculties]);
 
   const filteredUsers = useMemo(
     () =>
@@ -81,27 +80,6 @@ export default function UserTable({ initialUsers = [], faculties = [] }) {
     {
       label: "Edit Account",
       onClick: (row) => router.push(`/dashboard/edit-account/${row.id}`),
-    },
-    {
-      label: "Deactivate Account",
-      onClick: (row) => {
-        setUsers((prev) =>
-          prev.map((user) =>
-            user.id === row.id ? { ...user, status: "Inactive" } : user,
-          ),
-        );
-      },
-    },
-    {
-      label: "Delete Account",
-      onClick: (row) => {
-        const confirmed = window.confirm(
-          `Are you sure you want to delete ${row.name}'s account?`,
-        );
-        if (confirmed) {
-          setUsers((prev) => prev.filter((user) => user.id !== row.id));
-        }
-      },
     },
   ];
 

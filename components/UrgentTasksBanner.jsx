@@ -14,6 +14,8 @@ export function UrgentTasksBanner({
   buttonText = "View Urgent Tasks",
   submissionCount = 8,
   message = "are approaching the deadline. Please review them immediately.",
+  urgentTasks = [],
+  urgentTasksError = "",
 }) {
   return (
     <div className="flex items-center justify-between rounded-lg border-l-4 border-l-[#f47c6c] bg-background px-4 py-3 shadow-sm">
@@ -29,10 +31,12 @@ export function UrgentTasksBanner({
             {buttonText}
           </Button>
         </DialogTrigger>
-        <DialogContent showCloseButton={false} className="max-w-sm p-0">
+        <DialogContent showCloseButton={false} className="max-w-lg p-0">
           <UrgentTasksDialog
             submissionCount={submissionCount}
             message={message}
+            urgentTasks={urgentTasks}
+            urgentTasksError={urgentTasksError}
           />
         </DialogContent>
       </Dialog>

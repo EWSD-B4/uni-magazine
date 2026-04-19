@@ -1,7 +1,22 @@
 import CoorTable from "@/components/coor/CoorTable";
-import { getContributionListing } from "@/lib/actions/contribution.action";
+import {
+  getContributionListing,
+  getCoordinatorUrgentContributions,
+} from "@/lib/actions/contribution.action";
+import { getCurrentAcademicYearDeadlines } from "@/lib/actions/student.action";
 
 export default async function CoordinatorDashboardPage() {
-  const data = await getContributionListing("coordinator");
-  return <CoorTable contributionsPayload={data} />;
+  const [data, urgentTasksPayload, deadlines] = await Promise.all([
+    getContributionListing("coordinator"),
+    getCoordinatorUrgentContributions(),
+    getCurrentAcademicYearDeadlines(),
+  ]);
+
+  return (
+    <CoorTable
+      contributionsPayload={data}
+      urgentTasksPayload={urgentTasksPayload}
+      deadlines={deadlines}
+    />
+  );
 }

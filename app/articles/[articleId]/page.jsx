@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import ArticleCarousel from "@/components/ArticleCarousel";
 import CoordinatorCommentSection from "@/components/coor/CoordinatorCommentSection";
+import CoordinatorContributionDecisionButtons from "@/components/coor/CoordinatorContributionDecisionButtons";
 import ArticleRichContent from "@/components/ArticleRichContent";
 import { Button } from "@/components/ui/button";
 import {
@@ -187,6 +188,12 @@ export default async function ArticleDetailPage({ params }) {
           ) : null}
         </div>
 
+        <CoordinatorContributionDecisionButtons
+          contributionId={contributionId}
+          currentStatus={asString(contribution?.status || contribution?.state)}
+          returnPath={`/articles/${articleId}`}
+        />
+
         {images.length ? <ArticleCarousel images={images} title={title} /> : null}
 
         <Card className="border-slate-200/80 bg-white/95 shadow-lg">
@@ -230,9 +237,11 @@ export default async function ArticleDetailPage({ params }) {
             <Button variant="outline" asChild>
               <Link href="/articles">Back to articles</Link>
             </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
+            {viewer.role !== "guest" ? (
+              <Button variant="ghost" asChild>
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+            ) : null}
           </div>
         </header>
 

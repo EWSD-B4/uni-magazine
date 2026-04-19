@@ -1,142 +1,116 @@
-"use client";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, User } from "lucide-react";
 
-import { useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, User, Plus } from "lucide-react";
+import { getFaculties, getUsers } from "@/lib/actions/admin.action";
 
-export default function EditAccountPage() {
-  const router = useRouter();
-  const params = useParams();
+function asString(value, fallback = "") {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  return fallback;
+}
 
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [faculty, setFaculty] = useState("IT");
-  const [role, setRole] = useState("Marketing Manager");
+export default async function EditAccountPage({ params }) {
+  const { id } = await params;
+  const [users, faculties] = await Promise.all([getUsers(), getFaculties()]);
 
-  const faculties = ["IT", "Physics", "English", "Arts"];
-  const roles = [
-    "Marketing Coordinator",
-    "Student",
-    "Guest",
-    "Marketing Manager",
-  ];
+  const user = (Array.isArray(users) ? users : []).find(
+    (item) => asString(item?.id) === asString(id),
+  );
 
-  const handleSave = (e) => {
-    e.preventDefault();
+  if (!user) {
+    notFound();
+  }
 
-    if (!fullName || !email) {
-      alert("Please fill in Full Name and Email.");
-      return;
-    }
-
-    alert(`User ID ${params.id} updated successfully!`);
-    router.push("/dashboard");
-  };
+  const facultyOptions = (Array.isArray(faculties) ? faculties : []).map((item) =>
+    typeof item === "string" ? item : asString(item?.name),
+  );
+  const roleOptions = Array.from(
+    new Set((Array.isArray(users) ? users : []).map((item) => asString(item?.role))),
+  ).filter(Boolean);
 
   return (
     <div className="min-h-screen bg-[#e8e3dc] px-6 py-8">
-      <button
-        onClick={() => router.back()}
-        className="mb-8 flex items-center gap-2 rounded-full bg-[#f26b5b] px-6 py-3 text-white"
+      <Link
+        href="/dashboard"
+        className="mb-8 inline-flex items-center gap-2 rounded-full bg-[#f26b5b] px-6 py-3 text-white"
       >
         <ArrowLeft size={18} />
         Back
-      </button>
+      </Link>
 
-      <div className="mx-auto max-w-5xl">
-        <form onSubmit={handleSave} className="space-y-10">
-          <div className="flex flex-col items-center">
-            <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gray-300">
-              <User size={42} className="text-gray-700" />
-              <div className="absolute right-1 top-1 rounded-full bg-gray-500 p-1 text-white">
-                <Plus size={16} />
-              </div>
-            </div>
-
-            <h2 className="mt-4 text-2xl font-medium text-black">
-              Upload Image
-            </h2>
-            <p className="text-sm text-gray-500">Max file size: 1MB</p>
+      <div className="mx-auto max-w-5xl space-y-8">
+        <div className="flex flex-col items-center">
+          <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gray-300">
+            <User size={42} className="text-gray-700" />
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <div className="space-y-6">
-              <div>
-                <label className="mb-2 block text-sm text-black">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full rounded-md border bg-white px-4 py-3"
-                />
-              </div>
+          <h2 className="mt-4 text-2xl font-medium text-black">Account Details</h2>
+          <p className="text-sm text-gray-500">Loaded from backend</p>
+        </div>
 
-              <div>
-                <label className="mb-2 block text-sm text-black">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="example@gmail.com"
-                  className="w-full rounded-md border bg-white px-4 py-3"
-                />
-              </div>
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="space-y-6">
+            <div>
+              <label className="mb-2 block text-sm text-black">Full Name</label>
+              <input
+                type="text"
+                value={asString(user?.name)}
+                readOnly
+                className="w-full rounded-md border bg-white px-4 py-3"
+              />
             </div>
 
-            <div className="space-y-6">
-              <div>
-                <label className="mb-2 block text-sm text-black">Faculty</label>
-                <select
-                  value={faculty}
-                  onChange={(e) => setFaculty(e.target.value)}
-                  className="w-full rounded-md border bg-white px-4 py-3"
-                >
-                  {faculties.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div>
+              <label className="mb-2 block text-sm text-black">Email</label>
+              <input
+                type="email"
+                value={asString(user?.email)}
+                readOnly
+                className="w-full rounded-md border bg-white px-4 py-3"
+              />
+            </div>
+          </div>
 
-              <div>
-                <label className="mb-2 block text-sm text-black">Role</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="w-full rounded-md border bg-white px-4 py-3"
-                >
-                  {roles.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <div className="space-y-6">
+            <div>
+              <label className="mb-2 block text-sm text-black">Faculty</label>
+              <select
+                value={asString(user?.faculty)}
+                disabled
+                className="w-full rounded-md border bg-white px-4 py-3"
+              >
+                {facultyOptions.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <div className="hidden md:block" />
+            <div>
+              <label className="mb-2 block text-sm text-black">Role</label>
+              <select
+                value={asString(user?.role)}
+                disabled
+                className="w-full rounded-md border bg-white px-4 py-3"
+              >
+                {roleOptions.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="flex justify-center gap-6 pt-6">
-            <button
-              type="button"
-              onClick={() => router.push("/dashboard")}
-              className="rounded-full bg-white px-10 py-3 text-black shadow"
-            >
-              Cancel
-            </button>
+          <div className="hidden md:block" />
+        </div>
 
-            <button
-              type="submit"
-              className="rounded-full bg-[#f26b5b] px-10 py-3 text-black"
-            >
-              Save Changes
-            </button>
-          </div>
-        </form>
+        <p className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm text-slate-600">
+          Account update API is not connected on this page yet. Displayed values are
+          from backend only.
+        </p>
       </div>
     </div>
   );

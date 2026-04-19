@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import ArticleCarousel from "@/components/ArticleCarousel";
 import ArticleRichContent from "@/components/ArticleRichContent";
 import CoordinatorCommentSection from "@/components/coor/CoordinatorCommentSection";
+import CoordinatorContributionDecisionButtons from "@/components/coor/CoordinatorContributionDecisionButtons";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -185,6 +186,12 @@ export default async function CoordinatorContributionDetailPage({ params }) {
           </span>
         ) : null}
       </div>
+
+      <CoordinatorContributionDecisionButtons
+        contributionId={contributionId}
+        currentStatus={asString(contribution?.status || contribution?.state)}
+        returnPath={`/dashboard/${articleId}`}
+      />
 
       {images.length ? <ArticleCarousel images={images} title={title} /> : null}
 
