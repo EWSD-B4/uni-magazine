@@ -1,7 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { getContributionListing } from "@/lib/actions/contribution.action";
+import {
+  getContributionListing,
+  getGuestSelectedContributionListing,
+} from "@/lib/actions/contribution.action";
 import { requireAuthSession } from "@/lib/auth";
 import { asString, normalizeImages, unwrapPayload } from "@/lib/helpers/contribution";
 import { Button } from "@/components/ui/button";
@@ -52,9 +55,12 @@ function toArticleCard(item, index) {
 }
 
 export default async function ArticlesPage() {
-  await requireAuthSession();
+  const viewer = await requireAuthSession();
 
-  const payload = await getContributionListing("student");
+  const payload =
+    viewer.role === "guest"
+      ? await getGuestSelectedContributionListing(viewer.facultyId)
+      : await getContributionListing("student");
   const rawList = extractContributionList(payload);
   const articles = rawList.map((item, index) => toArticleCard(item, index));
 
@@ -74,9 +80,11 @@ export default async function ArticlesPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
+            {viewer.role !== "guest" ? (
+              <Button variant="outline" asChild>
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+            ) : null}
             <Button variant="ghost" asChild>
               <Link href="/statistics">Statistics</Link>
             </Button>

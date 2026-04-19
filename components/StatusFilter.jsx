@@ -21,15 +21,15 @@ const STATUS_OPTIONS = [
     count: null, // filled dynamically
   },
   {
-    value: "Approved",
-    label: "Approved",
+    value: "Selected",
+    label: "Selected",
     icon: CheckCircle2,
     iconColor: "text-[#016630]",
     badgeClass: "bg-[#016630]/10 text-[#016630]",
   },
   {
-    value: "Pending",
-    label: "Pending",
+    value: "Under Review",
+    label: "Under Review",
     icon: Clock,
     iconColor: "text-[#B8860B]",
     badgeClass: "bg-[#FFDF20]/20 text-[#B8860B]",

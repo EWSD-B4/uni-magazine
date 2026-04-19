@@ -3,14 +3,47 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import {
+  getBrowserUsageAnalytics,
+  getMostViewedPagesAnalytics,
+} from "@/lib/actions/admin.action";
 
-const STAT_ITEMS = [
-  { label: "Active submissions", value: "128" },
-  { label: "Under review", value: "47" },
-  { label: "Approved for export", value: "22" },
-]
+function asNumber(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
 
-export default function StatisticsPage() {
+export default async function StatisticsPage() {
+  const [mostViewedResult, browserUsageResult] = await Promise.allSettled([
+    getMostViewedPagesAnalytics(),
+    getBrowserUsageAnalytics(),
+  ]);
+
+  const mostViewed =
+    mostViewedResult.status === "fulfilled" ? mostViewedResult.value : [];
+  const browserUsage =
+    browserUsageResult.status === "fulfilled" ? browserUsageResult.value : [];
+  const loadError =
+    mostViewedResult.status === "rejected" || browserUsageResult.status === "rejected"
+      ? "Unable to load full statistics from backend."
+      : "";
+
+  const totalViews = mostViewed.reduce(
+    (sum, item) => sum + asNumber(item?.views ?? item?.count ?? item?.total),
+    0,
+  );
+  const totalBrowsers = browserUsage.length;
+  const topBrowser =
+    browserUsage
+      .slice()
+      .sort((a, b) => asNumber(b?.value) - asNumber(a?.value))[0]?.name || "-";
+
+  const statItems = [
+    { label: "Tracked pages", value: String(mostViewed.length) },
+    { label: "Total page views", value: String(totalViews) },
+    { label: "Top browser", value: topBrowser },
+  ];
+
   return (
     <div className="min-h-screen px-6 py-12">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
@@ -29,7 +62,7 @@ export default function StatisticsPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          {STAT_ITEMS.map((item) => (
+          {statItems.map((item) => (
             <Card key={item.label} className="bg-white/90">
               <CardHeader className="space-y-2">
                 <CardTitle className="text-base text-muted-foreground">
@@ -48,15 +81,10 @@ export default function StatisticsPage() {
             <CardTitle className="text-lg">Weekly activity</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm text-slate-600">
-            <p>
-              Activity metrics are displayed as placeholders until analytics are
-              connected. This section will summarize trends across faculties,
-              review times, and publication cadence.
-            </p>
+            {loadError ? <p>{loadError}</p> : null}
             <Separator />
             <p>
-              Replace these figures with live data once the backend reporting
-              pipeline is available.
+              Browser groups received from backend: {totalBrowsers}
             </p>
           </CardContent>
         </Card>

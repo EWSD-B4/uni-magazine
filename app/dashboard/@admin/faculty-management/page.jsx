@@ -1,34 +1,28 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { FacultyClient } from "@/components/admin/FacultyClient";
+import { getFaculties } from "@/lib/actions/admin.action";
 
-const faculties = [
-  "Arts & Humanities",
-  "Business & Economics",
-  "Engineering & Design",
-  "Health & Life Sciences",
-  "Law & Governance",
-  "Science & Technology",
-]
+function asString(value, fallback = "") {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  return fallback;
+}
 
-export default function FacultyManagementPage() {
+export default async function FacultyPage() {
+  const faculties = await getFaculties();
+  const initialData = (Array.isArray(faculties) ? faculties : []).map(
+    (faculty, index) => ({
+      id: asString(faculty?.id, String(index + 1)),
+      code: asString(faculty?.code ?? faculty?.facultyCode ?? faculty?.id, "-"),
+      faculty: asString(
+        typeof faculty === "string" ? faculty : faculty?.name,
+        "N/A",
+      ),
+    }),
+  );
+
   return (
-    <div className="space-y-6 p-6">
-      <h1 className="text-2xl font-semibold text-slate-900">Faculty Management</h1>
-
-      <Card className="border-slate-200/80 bg-white/95 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base">Configured Faculties</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {faculties.map((faculty) => (
-            <div
-              key={faculty}
-              className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700"
-            >
-              {faculty}
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+    <div className="p-6">
+      <FacultyClient initialData={initialData} />
     </div>
-  )
+  );
 }

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 
 import { updateContribution } from "@/lib/actions/student.action";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,8 @@ export default function StudentContributionEditForm({
     INITIAL_EDIT_STATE,
   );
   const photosInputRef = React.useRef(null);
+  const totalImages = savedImages.length + newImages.length;
+  const remainingSlots = Math.max(0, MAX_IMAGES - totalImages);
 
   React.useEffect(() => {
     if (!photosInputRef.current) return;
@@ -173,6 +175,11 @@ export default function StudentContributionEditForm({
     setInfoMessage("");
   }
 
+  function handleAddMoreImagesClick() {
+    if (!photosInputRef.current || isPending || remainingSlots <= 0) return;
+    photosInputRef.current.click();
+  }
+
   return (
     <form
       action={formAction}
@@ -220,9 +227,27 @@ export default function StudentContributionEditForm({
           ) : null}
         </div>
 
-        {savedImages.length ? (
+        <div className="space-y-2">
+          <Label htmlFor="new-photos">Upload New Photos</Label>
+          <Input
+            id="new-photos"
+            ref={photosInputRef}
+            name="photos"
+            type="file"
+            multiple
+            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+            onChange={handleNewImagesChange}
+            disabled={isPending}
+            className="bg-background file:mr-3 file:rounded-full file:border-0 file:bg-red-500 file:px-4 file:py-2 file:text-white hover:file:bg-red-600"
+          />
+          <p className="text-xs text-slate-500">
+            Optional. Max {MAX_IMAGES} photos total after edits.
+          </p>
+        </div>
+
+        {totalImages > 0 || remainingSlots > 0 ? (
           <div className="space-y-3">
-            <Label>Current Photos</Label>
+            <Label>Photos</Label>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {savedImages.map((image) => (
                 <div
@@ -248,32 +273,7 @@ export default function StudentContributionEditForm({
                   </button>
                 </div>
               ))}
-            </div>
-          </div>
-        ) : null}
 
-        <div className="space-y-2">
-          <Label htmlFor="new-photos">Upload New Photos</Label>
-          <Input
-            id="new-photos"
-            ref={photosInputRef}
-            name="photos"
-            type="file"
-            multiple
-            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-            onChange={handleNewImagesChange}
-            disabled={isPending}
-            className="bg-background file:mr-3 file:rounded-full file:border-0 file:bg-red-500 file:px-4 file:py-2 file:text-white hover:file:bg-red-600"
-          />
-          <p className="text-xs text-slate-500">
-            Optional. Max {MAX_IMAGES} photos total after edits.
-          </p>
-        </div>
-
-        {newImages.length ? (
-          <div className="space-y-3">
-            <Label>New Photos</Label>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {newImages.map((item) => (
                 <div
                   key={item.id}
@@ -297,6 +297,19 @@ export default function StudentContributionEditForm({
                     <X className="size-3" />
                   </button>
                 </div>
+              ))}
+
+              {Array.from({ length: remainingSlots }).map((_, index) => (
+                <button
+                  key={`empty-slot-${index}`}
+                  type="button"
+                  onClick={handleAddMoreImagesClick}
+                  disabled={isPending}
+                  className="flex h-24 w-full items-center justify-center rounded-md border border-dashed bg-background text-muted-foreground transition hover:bg-muted/40 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label="Add more photos"
+                >
+                  <Plus className="size-5" />
+                </button>
               ))}
             </div>
           </div>

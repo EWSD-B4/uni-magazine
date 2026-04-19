@@ -11,11 +11,28 @@ function asString(value, fallback = "") {
 }
 
 function normalizeStatus(value) {
-  const normalized = asString(value).trim().toLowerCase();
+  const raw = asString(value).trim();
+  if (!raw) return "-";
+
+  const normalized = raw.toLowerCase();
   if (normalized === "approved") return "Approved";
   if (normalized === "rejected") return "Rejected";
   if (normalized === "pending") return "Pending";
-  return "Pending";
+  return raw;
+}
+
+function normalizePlagiarismStatus(value) {
+  if (typeof value === "boolean") {
+    return value ? "Flagged" : "Clear";
+  }
+
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+
+  const normalized = asString(value).trim();
+  if (!normalized) return "";
+  return normalized;
 }
 
 function formatSubmittedDate(value) {
@@ -89,10 +106,24 @@ function extractContributionList(payload) {
 }
 
 function normalizeContributionRow(item, index) {
+  const hasStatusField =
+    item && typeof item === "object" && Object.prototype.hasOwnProperty.call(item, "status");
+  const plagiarismStatus = normalizePlagiarismStatus(
+    item?.plagiarismStatus ??
+      item?.plagiarism_status ??
+      item?.plagiarismResult ??
+      item?.plagiarism_result ??
+      item?.similarityStatus ??
+      item?.similarity_status ??
+      item?.plagiarism?.status,
+  );
+
   return {
     id: asString(item?.id ?? item?.contributionId ?? item?.articleId ?? index + 1),
     title: asString(item?.title ?? item?.name ?? item?.articleTitle, "Untitled"),
-    statues: normalizeStatus(item?.status ?? item?.state),
+    statues: hasStatusField ? normalizeStatus(item?.status) : "",
+    hasStatusField,
+    plagiarismStatus,
     date: formatSubmittedDate(
       item?.submittedAt ?? item?.createdAt ?? item?.created_at ?? item?.date,
     ),

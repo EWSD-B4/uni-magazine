@@ -1,11 +1,15 @@
 "use client";
+import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link"
 import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { loginAction } from "@/lib/actions/auth";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
@@ -22,7 +26,15 @@ export default function LoginPage() {
         ) : null}
 
         {/* Logo */}
-        <Image src="/logo.png" alt="Campus Mag" width={80} height={80} />
+        <Link href="/">
+          <Image
+            src="/logo_black.svg"
+            alt="Campus Mag"
+            width={200}
+            height={200}
+            className="mb-6"
+          />
+        </Link>
 
         {/* Email */}
         <div className="w-full space-y-2">
@@ -43,19 +55,19 @@ export default function LoginPage() {
 
           <Input
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="********"
             className="rounded-full bg-white/70 border-none h-12 px-5 pr-10"
             required
           />
 
           {/* Eye Icon */}
-          {/* <div
+          <div
             className="absolute right-4 top-[38px] cursor-pointer text-gray-500"
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-          </div> */}
+          </div>
         </div>
 
         {/* Login Button */}

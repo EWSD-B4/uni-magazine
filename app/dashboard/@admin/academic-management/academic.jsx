@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import {
   createAcademicYearAction,
   deleteAcademicYearAction,
+  setCurrentAcademicYearAction,
   updateAcademicYearAction,
 } from "@/lib/actions/admin.action";
 import { Button } from "@/components/ui/button";
@@ -32,36 +33,49 @@ const initialForm = {
   endDate: "",
   closureDate: "",
   closureFinalDate: "",
-  status: "Active",
 };
+
+function rowTextClass(row) {
+  return row?.isActive
+    ? "font-semibold text-slate-900"
+    : "font-normal text-slate-500";
+}
 
 const columns = [
   {
     key: "id",
     header: "No.",
-    render: (_value, _row, index) => `${index + 1}.`,
+    render: (_value, row, index) => (
+      <span className={rowTextClass(row)}>{`${index + 1}.`}</span>
+    ),
   },
-  { key: "yearName", header: "Academic Year" },
-  { key: "startDate", header: "Submission Open" },
-  { key: "closureDate", header: "Closure Date" },
-  { key: "closureFinalDate", header: "Final Closure" },
   {
-    key: "status",
-    header: "Status",
-    render: (value) => {
-      const isActive = String(value).toLowerCase() === "active";
-      return (
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${
-            isActive
-              ? "bg-green-100 text-green-700"
-              : "bg-slate-200 text-slate-700"
-          }`}
-        >
-          {value || "N/A"}
-        </span>
-      );
-    },
+    key: "yearName",
+    header: "Academic Year",
+    render: (value, row) => (
+      <span className={rowTextClass(row)}>{value || "-"}</span>
+    ),
+  },
+  {
+    key: "startDate",
+    header: "Submission Open",
+    render: (value, row) => (
+      <span className={rowTextClass(row)}>{value || "-"}</span>
+    ),
+  },
+  {
+    key: "closureDate",
+    header: "Closure Date",
+    render: (value, row) => (
+      <span className={rowTextClass(row)}>{value || "-"}</span>
+    ),
+  },
+  {
+    key: "closureFinalDate",
+    header: "Final Closure",
+    render: (value, row) => (
+      <span className={rowTextClass(row)}>{value || "-"}</span>
+    ),
   },
 ];
 
@@ -95,16 +109,31 @@ function formatDateLabel(value) {
   }).format(date);
 }
 
-function toRow(item, fallbackId) {
+function toRow(item, fallbackId, currentId = "") {
+  const id = asString(item?.id, fallbackId);
+  const status = asString(item?.status).toLowerCase();
+  const normalizedCurrentId = asString(currentId);
+
   return {
-    id: asString(item?.id, fallbackId),
+    id,
     yearName: asString(item?.yearName),
     startDate: toInputDate(item?.startDate),
     endDate: toInputDate(item?.endDate),
     closureDate: toInputDate(item?.closureDate),
     closureFinalDate: toInputDate(item?.closureFinalDate),
-    status: asString(item?.status, "Active"),
+    status,
+    isActive: normalizedCurrentId ? id === normalizedCurrentId : status === "active",
   };
+}
+
+function resolveCurrentAcademicYearId(academicYears, currentAcademicYear) {
+  const currentId = asString(currentAcademicYear?.id);
+  if (currentId) return currentId;
+
+  const activeYear = academicYears.find(
+    (item) => asString(item?.status).toLowerCase() === "active",
+  );
+  return asString(activeYear?.id);
 }
 
 function validateCreateForm(formData) {
@@ -132,8 +161,18 @@ export default function AcademicYearPage({
   currentAcademicYear = null,
   loadError = "",
 }) {
-  const [rows, setRows] = React.useState(
-    initialAcademicYears.map((item, index) => toRow(item, index + 1)),
+  const initialCurrentAcademicYearId = React.useMemo(
+    () => resolveCurrentAcademicYearId(initialAcademicYears, currentAcademicYear),
+    [initialAcademicYears, currentAcademicYear],
+  );
+
+  const [currentAcademicYearId, setCurrentAcademicYearId] = React.useState(
+    initialCurrentAcademicYearId,
+  );
+  const [rows, setRows] = React.useState(() =>
+    initialAcademicYears.map((item, index) =>
+      toRow(item, index + 1, initialCurrentAcademicYearId),
+    ),
   );
   const [showModal, setShowModal] = React.useState(false);
   const [editingRow, setEditingRow] = React.useState(null);
@@ -141,6 +180,7 @@ export default function AcademicYearPage({
   const [clientError, setClientError] = React.useState("");
   const [clientSuccess, setClientSuccess] = React.useState("");
   const [isDeletePending, startDeleteTransition] = React.useTransition();
+  const [isSetCurrentPending, startSetCurrentTransition] = React.useTransition();
 
   const [createState, createFormAction, isCreatePending] = React.useActionState(
     createAcademicYearAction,
@@ -151,7 +191,7 @@ export default function AcademicYearPage({
     INITIAL_UPDATE_STATE,
   );
 
-  const isPending = isCreatePending || isUpdatePending;
+  const isPending = isCreatePending || isUpdatePending || isDeletePending || isSetCurrentPending;
 
   React.useEffect(() => {
     if (!createState?.message) return;
@@ -159,7 +199,7 @@ export default function AcademicYearPage({
     if (createState.ok && createState.academicYear) {
       setRows((previous) => [
         ...previous,
-        toRow(createState.academicYear, previous.length + 1),
+        toRow(createState.academicYear, previous.length + 1, currentAcademicYearId),
       ]);
       setClientError("");
       setClientSuccess(createState.message);
@@ -171,25 +211,32 @@ export default function AcademicYearPage({
 
     setClientSuccess("");
     setClientError(createState.message);
-  }, [createState]);
+  }, [createState, currentAcademicYearId]);
 
   React.useEffect(() => {
     if (!updateState?.message) return;
 
     if (updateState.ok && updateState.academicYear) {
       setRows((previous) =>
-        previous.map((row) =>
-          row.id === asString(updateState.academicYear.id)
-            ? {
-                ...row,
-                yearName: toRow(updateState.academicYear, row.id).yearName,
-                closureDate: toRow(updateState.academicYear, row.id).closureDate,
-                closureFinalDate: toRow(updateState.academicYear, row.id)
-                  .closureFinalDate,
-                status: toRow(updateState.academicYear, row.id).status || row.status,
-              }
-            : row,
-        ),
+        previous.map((row) => {
+          if (row.id !== asString(updateState.academicYear.id)) {
+            return row;
+          }
+
+          const updated = toRow(
+            updateState.academicYear,
+            row.id,
+            currentAcademicYearId,
+          );
+          return {
+            ...row,
+            yearName: updated.yearName,
+            closureDate: updated.closureDate,
+            closureFinalDate: updated.closureFinalDate,
+            status: updated.status || row.status,
+            isActive: row.id === currentAcademicYearId,
+          };
+        }),
       );
       setClientError("");
       setClientSuccess(updateState.message);
@@ -201,9 +248,16 @@ export default function AcademicYearPage({
 
     setClientSuccess("");
     setClientError(updateState.message);
-  }, [updateState]);
+  }, [updateState, currentAcademicYearId]);
 
-  const current = currentAcademicYear ? toRow(currentAcademicYear, "") : null;
+  const current = React.useMemo(() => {
+    const activeRow =
+      rows.find((row) => row.id === currentAcademicYearId) ||
+      rows.find((row) => row.isActive);
+
+    if (activeRow) return activeRow;
+    return currentAcademicYear ? toRow(currentAcademicYear, "", currentAcademicYearId) : null;
+  }, [rows, currentAcademicYear, currentAcademicYearId]);
 
   const openCreate = () => {
     setEditingRow(null);
@@ -221,7 +275,6 @@ export default function AcademicYearPage({
       endDate: asString(row.endDate),
       closureDate: asString(row.closureDate),
       closureFinalDate: asString(row.closureFinalDate),
-      status: asString(row.status, "Active"),
     });
     setClientError("");
     setShowModal(true);
@@ -255,7 +308,48 @@ export default function AcademicYearPage({
       setRows((previous) =>
         previous.filter((item) => item.id !== asString(result.id)),
       );
+      if (asString(result.id) === currentAcademicYearId) {
+        setCurrentAcademicYearId("");
+      }
       setClientSuccess(result.message || "Academic year deleted.");
+    });
+  };
+
+  const handleSetCurrent = (row) => {
+    const nextCurrentId = asString(row.id);
+    if (!nextCurrentId) {
+      setClientSuccess("");
+      setClientError("Missing academic year id.");
+      return;
+    }
+
+    if (nextCurrentId === currentAcademicYearId) {
+      setClientError("");
+      setClientSuccess(`${row.yearName} is already active.`);
+      return;
+    }
+
+    setClientSuccess("");
+    setClientError("");
+
+    startSetCurrentTransition(async () => {
+      const payload = new FormData();
+      payload.set("id", nextCurrentId);
+      const result = await setCurrentAcademicYearAction(null, payload);
+
+      if (!result?.ok) {
+        setClientError(result?.message || "Failed to set current academic year.");
+        return;
+      }
+
+      setCurrentAcademicYearId(nextCurrentId);
+      setRows((previous) =>
+        previous.map((item) => ({
+          ...item,
+          isActive: item.id === nextCurrentId,
+        })),
+      );
+      setClientSuccess(result.message || "Current academic year updated.");
     });
   };
 
@@ -275,6 +369,7 @@ export default function AcademicYearPage({
   };
 
   const tableActions = [
+    { label: "Set Active", onClick: handleSetCurrent },
     { label: "Edit", onClick: openEdit },
     { label: "Delete", onClick: handleDelete },
   ];

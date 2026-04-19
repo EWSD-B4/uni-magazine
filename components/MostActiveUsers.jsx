@@ -17,15 +17,7 @@ import {
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-const defaultData = [
-  { id: 1, username: "Thiha Aung", contributions: 87, avatar: "/placeholder.svg?height=32&width=32" },
-  { id: 2, username: "Nicole John", contributions: 79, avatar: "/placeholder.svg?height=32&width=32" },
-  { id: 3, username: "Zhou Ke Yu", contributions: 65, avatar: "/placeholder.svg?height=32&width=32" },
-  { id: 4, username: "Winn Aung", contributions: 56, avatar: "/placeholder.svg?height=32&width=32" },
-  { id: 5, username: "Ei Shwe Sin", contributions: 52, avatar: "/placeholder.svg?height=32&width=32" },
-]
-
-export function MostActiveUsers({ data = defaultData, onViewProfile, className }) {
+export function MostActiveUsers({ data = [], className }) {
   return (
     <Card className={className}>
       <CardHeader className="pb-4">
@@ -49,21 +41,29 @@ export function MostActiveUsers({ data = defaultData, onViewProfile, className }
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((user, index) => (
-              <TableRow key={user.id} className="border-b-0 hover:bg-muted/50">
-                <TableCell className="font-medium">{index + 1}.</TableCell>
-                <TableCell className="text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar} alt={user.username} />
-                      <AvatarFallback>{user.username.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <span>{user.username}</span>
-                  </div>
+            {data.length ? (
+              data.map((user, index) => (
+                <TableRow key={user.id} className="border-b-0 hover:bg-muted/50">
+                  <TableCell className="font-medium">{index + 1}.</TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.avatar} alt={user.username} />
+                        <AvatarFallback>{user.username.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span>{user.username}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">{user.contributions}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow className="border-b-0">
+                <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
+                  No data from backend.
                 </TableCell>
-                <TableCell className="text-right">{user.contributions}</TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </CardContent>

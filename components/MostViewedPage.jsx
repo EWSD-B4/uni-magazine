@@ -16,15 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-const defaultData = [
-  { id: 1, page: "Home Page", views: 3200 },
-  { id: 2, page: "Submissions Page", views: 2475 },
-  { id: 3, page: "Edit Page", views: 1965 },
-  { id: 4, page: "Student Dashboard", views: 1725 },
-  { id: 5, page: "Article Page", views: 1480 },
-]
-
-export function MostViewedPage({ data = defaultData, className }) {
+export function MostViewedPage({ data = [], className }) {
   return (
     <Card className={className}>
       <CardHeader className="pb-4">
@@ -47,13 +39,21 @@ export function MostViewedPage({ data = defaultData, className }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((item, index) => (
-              <TableRow key={item.id} className="border-b-0 hover:bg-muted/50">
-                <TableCell className="font-medium">{index + 1}.</TableCell>
-                <TableCell className="text-center">{item.page}</TableCell>
-                <TableCell className="text-right">{item.views.toLocaleString()}</TableCell>
+            {data.length ? (
+              data.map((item, index) => (
+                <TableRow key={item.id} className="border-b-0 hover:bg-muted/50">
+                  <TableCell className="font-medium">{index + 1}.</TableCell>
+                  <TableCell className="text-center">{item.page}</TableCell>
+                  <TableCell className="text-right">{item.views.toLocaleString()}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow className="border-b-0">
+                <TableCell colSpan={3} className="py-6 text-center text-muted-foreground">
+                  No data from backend.
+                </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </CardContent>

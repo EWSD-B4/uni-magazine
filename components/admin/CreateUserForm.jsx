@@ -1,9 +1,8 @@
 "use client";
 
-import { useActionState, useMemo, useRef, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { ArrowLeft, Eye, EyeOff, Plus } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { createUserAction } from "@/lib/actions/admin.action";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,14 +28,12 @@ function uniqueSorted(items) {
 
 export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
   const router = useRouter();
-  const fileInputRef = useRef(null);
 
   const [actionState, formAction, isPending] = useActionState(
     createUserAction,
     INITIAL_ACTION_STATE,
   );
 
-  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [facultyId, setFacultyId] = useState("");
@@ -97,12 +94,6 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
     [faculties],
   );
 
-  const handleImageSelect = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setImagePreviewUrl(URL.createObjectURL(file));
-  };
-
   const handleSubmit = (event) => {
     setClientError("");
 
@@ -147,43 +138,6 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
         </h1>
 
         <form action={formAction} onSubmit={handleSubmit} className="space-y-10">
-          <div className="flex flex-col items-center">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="relative size-28 overflow-hidden rounded-full border border-slate-300 bg-slate-200"
-            >
-              {imagePreviewUrl ? (
-                <Image
-                  src={imagePreviewUrl}
-                  alt="User profile preview"
-                  fill
-                  unoptimized
-                  className="object-cover"
-                />
-              ) : (
-                <div className="grid h-full w-full place-items-center text-slate-500">
-                  Upload
-                </div>
-              )}
-              <span className="absolute right-1 top-1 grid size-7 place-items-center rounded-full bg-slate-700 text-white">
-                <Plus className="size-4" />
-              </span>
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/jpg"
-              className="hidden"
-              onChange={handleImageSelect}
-            />
-
-            <h2 className="mt-4 text-2xl font-medium text-slate-900">
-              Upload Image
-            </h2>
-            <p className="text-sm text-slate-500">Max file size: 1MB</p>
-          </div>
-
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-5">
               <div className="space-y-2">
