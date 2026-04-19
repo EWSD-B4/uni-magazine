@@ -10,7 +10,7 @@ export default function NotFound() {
             <div className="text-center space-y-8">
 
                 {/* Floating 404 */}
-                <h1 className="text-[120px] font-bold text-blue-600 animate-bounce">
+                <h1 className="text-[120px] font-bold text-[#F26454] animate-bounce">
                     404
                 </h1>
 
@@ -30,7 +30,7 @@ export default function NotFound() {
 
                     <Link
                         href="/"
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition"
+                        className="flex items-center gap-2 bg-[#F26454] hover:bg-[#F26454] text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition"
                     >
                         <Home size={18} />
                         Go Home
