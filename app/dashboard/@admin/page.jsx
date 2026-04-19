@@ -1,18 +1,11 @@
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
 import {
   getBrowserUsageAnalytics,
+  getFacultyDistributionAnalytics,
   getMostViewedPagesAnalytics,
   getUsers,
 } from "@/lib/actions/admin.action";
-
-const chartColors = [
-  "#F26454CC",
-  "#22C55ECC",
-  "#FBBF24CC",
-  "#3B82F6CC",
-  "#A855F7CC",
-  "#14B8A6CC",
-];
+import { requireAuthSession } from "@/lib/auth";
 
 function asString(value, fallback = "") {
   if (typeof value === "string") return value;
@@ -43,41 +36,18 @@ function mapMostActiveUsers(users) {
     .slice(0, 5);
 }
 
-function mapContributionChart(users) {
-  const buckets = new Map();
-
-  users.forEach((user) => {
-    const faculty = asString(user?.faculty, "N/A").toUpperCase();
-    const contributionCount = asNumber(
-      user?.contributions ??
-        user?.totalContributions ??
-        user?.submissionCount ??
-        user?.articleCount,
-      0,
-    );
-    const current = buckets.get(faculty) || { contributionCount: 0 };
-    current.contributionCount += contributionCount;
-    buckets.set(faculty, current);
-  });
-
-  const chart = Array.from(buckets.entries())
-    .map(([name, value], index) => ({
-      name,
-      contributions: value.contributionCount,
-      color: chartColors[index % chartColors.length],
-    }))
-    .filter((item) => item.contributions > 0)
-    .sort((a, b) => b.contributions - a.contributions)
-    .slice(0, 6);
-
-  return chart;
-}
-
 export default async function AdminDashboardPage() {
-  const [usersResult, mostViewedResult, browserUsageResult] = await Promise.allSettled([
+  const session = await requireAuthSession();
+  if (session.role !== "admin") {
+    return null;
+  }
+
+  const [usersResult, mostViewedResult, browserUsageResult, facultyDistributionResult] =
+    await Promise.allSettled([
     getUsers(),
     getMostViewedPagesAnalytics(),
     getBrowserUsageAnalytics(),
+    getFacultyDistributionAnalytics(),
   ]);
 
   const users = usersResult.status === "fulfilled" ? usersResult.value : [];
@@ -85,6 +55,10 @@ export default async function AdminDashboardPage() {
     mostViewedResult.status === "fulfilled" ? mostViewedResult.value : [];
   const browserUsage =
     browserUsageResult.status === "fulfilled" ? browserUsageResult.value : [];
+  const facultyDistribution =
+    facultyDistributionResult.status === "fulfilled"
+      ? facultyDistributionResult.value
+      : [];
 
   const loadErrors = [];
   if (usersResult.status === "rejected") {
@@ -108,16 +82,22 @@ export default async function AdminDashboardPage() {
         : "Failed to load browser usage analytics.",
     );
   }
+  if (facultyDistributionResult.status === "rejected") {
+    loadErrors.push(
+      facultyDistributionResult.reason instanceof Error
+        ? facultyDistributionResult.reason.message
+        : "Failed to load faculty distribution analytics.",
+    );
+  }
 
   const mostActiveUsers = mapMostActiveUsers(users);
-  const contributionChart = mapContributionChart(users);
 
   return (
     <AdminDashboardClient
       mostViewedPages={mostViewedPages}
       mostActiveUsers={mostActiveUsers}
       browserUsage={browserUsage}
-      contributionChart={contributionChart}
+      contributionChart={facultyDistribution}
       loadError={loadErrors.join(" ")}
     />
   );

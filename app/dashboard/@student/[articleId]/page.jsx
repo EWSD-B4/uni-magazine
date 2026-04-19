@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
 
 import ArticleCarousel from "@/components/ArticleCarousel";
 import ArticleRichContent from "@/components/ArticleRichContent";
@@ -16,7 +16,9 @@ import {
   getCommentsByContributionId,
   queryContributionById,
 } from "@/lib/actions/contribution.action";
+import { getCurrentAcademicYearDeadlines } from "@/lib/actions/student.action";
 import { requireAuthSession } from "@/lib/auth";
+import { isDeadlinePassed } from "@/lib/helpers/deadline";
 import {
   asString,
   normalizeImages,
@@ -55,6 +57,18 @@ function toReadableDate(value) {
   return date.toISOString();
 }
 
+function toReadableDeadline(value) {
+  const raw = asString(value);
+  if (!raw) return "N/A";
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
 function normalizeComment(item, index) {
   const body = asString(
     item?.comment || item?.content || item?.message || item?.text,
@@ -80,9 +94,10 @@ function normalizeComment(item, index) {
 }
 
 export default async function StudentContributionDetailPage({ params }) {
+  noStore();
   const viewer = await requireAuthSession();
   if (viewer.role !== "student") {
-    redirect("/dashboard");
+    return null;
   }
 
   const { articleId } = await params;
@@ -91,6 +106,19 @@ export default async function StudentContributionDetailPage({ params }) {
   const contributionId = asString(
     contribution?.contributionId || contribution?.id || articleId,
   );
+  let deadlines = {
+    closureDate: "",
+    closureFinalDate: "",
+  };
+  try {
+    deadlines = await getCurrentAcademicYearDeadlines();
+  } catch {
+    deadlines = {
+      closureDate: "",
+      closureFinalDate: "",
+    };
+  }
+  const isEditLocked = isDeadlinePassed(deadlines?.closureFinalDate);
   const commentsPayload = await getCommentsByContributionId(contributionId);
   const comments = extractComments(commentsPayload)
     .map((item, index) => normalizeComment(item, index))
@@ -163,9 +191,15 @@ export default async function StudentContributionDetailPage({ params }) {
               </Link>
             </Button>
           ) : null}
-          <Button asChild>
-            <Link href={`/dashboard/${articleId}/edit`}>Edit article</Link>
-          </Button>
+          {!isEditLocked ? (
+            <Button asChild>
+              <Link href={`/dashboard/${articleId}/edit`}>Edit article</Link>
+            </Button>
+          ) : (
+            <span className="text-sm font-medium text-amber-700">
+              Edit deadline has passed ({toReadableDeadline(deadlines?.closureFinalDate)})
+            </span>
+          )}
         </div>
       </header>
 

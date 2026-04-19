@@ -131,8 +131,12 @@ function normalizeContributionRow(item, index) {
 }
 
 export default async function StudentDashboardPage() {
-  const [session, contributionsPayload, deadlines] = await Promise.all([
-    requireAuthSession(),
+  const session = await requireAuthSession();
+  if (session.role !== "student") {
+    return null;
+  }
+
+  const [contributionsPayload, deadlines] = await Promise.all([
     getContributionListing("student"),
     getCurrentAcademicYearDeadlines(),
   ]);
