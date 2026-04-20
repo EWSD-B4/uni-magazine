@@ -18,7 +18,6 @@ export default function ManagerDashboardClient({
   loadError,
 }) {
   const router = useRouter();
-  const [selectedPeriod, setSelectedPeriod] = React.useState("This Week");
   const [downloadError, setDownloadError] = React.useState("");
   const [isDownloading, setIsDownloading] = React.useState(false);
 
@@ -154,8 +153,7 @@ export default function ManagerDashboardClient({
             <div className="lg:col-span-2">
               <ContributionBarChart
                 data={chartData}
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={setSelectedPeriod}
+                showPeriodSelector={false}
               />
             </div>
             <StatusCard statuses={articleStatuses} />
