@@ -3,6 +3,9 @@ require("dotenv").config({ path: ".env.dev" })
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  serverActions: {
+    bodySizeLimit: "50mb",
+  },
   images: {
     remotePatterns: [
       {

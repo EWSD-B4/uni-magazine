@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/components/DataTable";
+import { Button } from "@/components/ui/button";
 import SubmissionDeadlinesSection from "@/components/student/SubmissionDeadlinesSection";
 import { getContributionStatusBadgeClass } from "@/lib/helpers/contribution-status";
 
@@ -105,12 +106,26 @@ export default function StudentDashboardClient({ rows, userName, deadlines }) {
           <h3 className="text-2xl font-bold text-foreground mb-8">
             My Articles
           </h3>
-          <DataTable
-            data={rows}
-            columns={columns}
-            pageSize={6}
-            actions={tableActions}
-          />
+          {rows.length ? (
+            <DataTable
+              data={rows}
+              columns={columns}
+              pageSize={6}
+              actions={tableActions}
+            />
+          ) : (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+              <p className="text-base font-medium text-slate-800">
+                You have no contributions yet.
+              </p>
+              <p className="mt-2 text-sm text-slate-600">
+                Start your first submission now.
+              </p>
+              <Button asChild className="mt-5 bg-[#f26b5b] hover:bg-[#e55d4f]">
+                <Link href="/dashboard/submit">Create one</Link>
+              </Button>
+            </div>
+          )}
         </main>
       </div>
     </div>
