@@ -2,6 +2,7 @@ import ManagerDashboardClient from "@/components/manager/ManagerDashboardClient"
 import { getManagerSelectedContributionListing } from "@/lib/actions/contribution.action";
 import { requireAuthSession } from "@/lib/auth";
 import { unwrapPayload } from "@/lib/helpers/contribution";
+import { getContributionStatusLabel } from "@/lib/helpers/contribution-status";
 
 const chartColors = [
   "#F26454CC",
@@ -16,14 +17,6 @@ function asString(value, fallback = "") {
   if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
   return fallback;
-}
-
-function normalizeStatus(value) {
-  const normalized = asString(value).trim().toLowerCase();
-  if (normalized === "approved" || normalized === "selected") return "Approved";
-  if (normalized === "rejected") return "Rejected";
-  if (normalized === "pending" || normalized === "under review") return "Pending";
-  return "Pending";
 }
 
 function formatSubmittedDate(value) {
@@ -100,7 +93,7 @@ function normalizeContributionRow(item, index) {
   return {
     id: asString(item?.id ?? item?.contributionId ?? item?.articleId ?? index + 1),
     title: asString(item?.title ?? item?.name ?? item?.articleTitle, "Untitled"),
-    status: normalizeStatus(item?.status ?? item?.state),
+    status: getContributionStatusLabel(item?.status ?? item?.state),
     date: formatSubmittedDate(
       item?.submittedAt ?? item?.createdAt ?? item?.created_at ?? item?.date,
     ),
@@ -127,25 +120,27 @@ function buildChartData(rows) {
 
 function buildStatusData(rows) {
   const total = rows.length || 1;
-  const approved = rows.filter((row) => row.status === "Approved").length;
-  const pending = rows.filter((row) => row.status === "Pending").length;
+  const submitted = rows.filter((row) => row.status === "Submitted").length;
+  const underReview = rows.filter(
+    (row) => row.status === "Under Review" || row.status === "Pending",
+  ).length;
   const rejected = rows.filter((row) => row.status === "Rejected").length;
 
   return [
     {
-      label: "Approved",
-      percentage: Math.round((approved / total) * 100),
-      color: "#016630",
+      label: "Submitted",
+      percentage: Math.round((submitted / total) * 100),
+      color: "#059669",
     },
     {
-      label: "Pending",
-      percentage: Math.round((pending / total) * 100),
-      color: "#FFDF20",
+      label: "Under Review",
+      percentage: Math.round((underReview / total) * 100),
+      color: "#0EA5E9",
     },
     {
       label: "Rejected",
       percentage: Math.round((rejected / total) * 100),
-      color: "#9F0712",
+      color: "#DC2626",
     },
   ];
 }
@@ -182,8 +177,10 @@ export default async function ManagerDashboardPage() {
       articleStatuses={buildStatusData(tableRows)}
       stats={{
         totalContributions: tableRows.length,
-        pendingReviews: tableRows.filter((row) => row.status === "Pending").length,
-        selectedContributions: tableRows.filter((row) => row.status === "Approved").length,
+        pendingReviews: tableRows.filter(
+          (row) => row.status === "Under Review" || row.status === "Pending",
+        ).length,
+        selectedContributions: tableRows.filter((row) => row.status === "Submitted").length,
         totalFaculties: new Set(tableRows.map((row) => row.faculty)).size,
       }}
       loadError={loadErrors.join(" ")}

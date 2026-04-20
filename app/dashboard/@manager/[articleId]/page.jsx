@@ -19,6 +19,7 @@ import {
   normalizeImages,
   unwrapPayload,
 } from "@/lib/helpers/contribution";
+import { formatTimestampToMinute } from "@/lib/helpers/date";
 
 export default async function ManagerContributionDetailPage({ params }) {
   const viewer = await requireAuthSession();
@@ -62,14 +63,14 @@ export default async function ManagerContributionDetailPage({ params }) {
       contribution?.name,
     "Unknown",
   );
-  const publishedAt =
-    asString(
-      contribution?.timestamp ||
-        metadata?.processedAt ||
-        contribution?.publishedAt ||
-        contribution?.publishDate ||
-        contribution?.createdAt,
-    ) || "N/A";
+  const publishedAt = formatTimestampToMinute(
+    contribution?.timestamp ||
+      metadata?.processedAt ||
+      contribution?.publishedAt ||
+      contribution?.publishDate ||
+      contribution?.createdAt,
+    "N/A",
+  );
   const images = normalizeImages(
     {
       ...contribution,

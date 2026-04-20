@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/components/DataTable";
 import SubmissionDeadlinesSection from "@/components/student/SubmissionDeadlinesSection";
+import { getContributionStatusBadgeClass } from "@/lib/helpers/contribution-status";
 
 function asString(value, fallback = "") {
   if (typeof value === "string") return value;
@@ -52,8 +53,16 @@ export default function StudentDashboardClient({ rows, userName, deadlines }) {
     if (showStatus) {
       mapped.push({
         key: "statues",
-        header: "Statues",
-        render: (value) => asString(value, "-"),
+        header: "Status",
+        render: (value) => (
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+              getContributionStatusBadgeClass(value)
+            }`}
+          >
+            {asString(value, "-")}
+          </span>
+        ),
       });
     }
 

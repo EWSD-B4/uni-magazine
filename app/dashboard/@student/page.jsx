@@ -3,22 +3,12 @@ import { getContributionListing } from "@/lib/actions/contribution.action";
 import { getCurrentAcademicYearDeadlines } from "@/lib/actions/student.action";
 import { requireAuthSession } from "@/lib/auth";
 import { unwrapPayload } from "@/lib/helpers/contribution";
+import { getContributionStatusLabel } from "@/lib/helpers/contribution-status";
 
 function asString(value, fallback = "") {
   if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
   return fallback;
-}
-
-function normalizeStatus(value) {
-  const raw = asString(value).trim();
-  if (!raw) return "-";
-
-  const normalized = raw.toLowerCase();
-  if (normalized === "approved") return "Approved";
-  if (normalized === "rejected") return "Rejected";
-  if (normalized === "pending") return "Pending";
-  return raw;
 }
 
 function normalizePlagiarismStatus(value) {
@@ -106,8 +96,13 @@ function extractContributionList(payload) {
 }
 
 function normalizeContributionRow(item, index) {
+  const hasRawStatusField =
+    item &&
+    typeof item === "object" &&
+    (Object.prototype.hasOwnProperty.call(item, "status") ||
+      Object.prototype.hasOwnProperty.call(item, "state"));
   const hasStatusField =
-    item && typeof item === "object" && Object.prototype.hasOwnProperty.call(item, "status");
+    hasRawStatusField;
   const plagiarismStatus = normalizePlagiarismStatus(
     item?.plagiarismStatus ??
       item?.plagiarism_status ??
@@ -121,7 +116,7 @@ function normalizeContributionRow(item, index) {
   return {
     id: asString(item?.id ?? item?.contributionId ?? item?.articleId ?? index + 1),
     title: asString(item?.title ?? item?.name ?? item?.articleTitle, "Untitled"),
-    statues: hasStatusField ? normalizeStatus(item?.status) : "",
+    statues: hasStatusField ? getContributionStatusLabel(item?.status ?? item?.state) : "",
     hasStatusField,
     plagiarismStatus,
     date: formatSubmittedDate(

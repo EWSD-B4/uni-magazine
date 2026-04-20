@@ -7,6 +7,7 @@ import {
   deleteCommentAction,
   updateCommentAction,
 } from "@/lib/actions/contribution.action";
+import { formatTimestampToMinute } from "@/lib/helpers/date";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,14 +22,6 @@ function asString(value, fallback = "") {
   if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
   return fallback;
-}
-
-function formatDate(value) {
-  const raw = asString(value);
-  if (!raw) return "N/A";
-  const date = new Date(raw);
-  if (Number.isNaN(date.getTime())) return raw;
-  return date.toISOString();
 }
 
 export default function CoordinatorCommentSection({
@@ -120,7 +113,10 @@ export default function CoordinatorCommentSection({
                   result.comment?.author,
                   asString(item.author, coordinatorName || "Coordinator"),
                 ),
-                date: asString(result.comment?.date, new Date().toISOString()),
+                date: asString(
+                  result.comment?.date,
+                  formatTimestampToMinute(new Date(), "N/A"),
+                ),
               }
             : item,
         ),
@@ -238,7 +234,7 @@ export default function CoordinatorCommentSection({
                 )}
                 <p className="mt-2 text-xs text-slate-500">
                   {asString(comment.author, "Coordinator")} •{" "}
-                  {formatDate(comment.date)}
+                  {formatTimestampToMinute(comment.date)}
                 </p>
                 {editingCommentId !== comment.id ? (
                   <div className="mt-3 flex items-center gap-2">

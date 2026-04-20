@@ -1,7 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDown, CheckCircle2, Clock, XCircle, LayoutGrid } from "lucide-react";
+import {
+  ChevronDown,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Eye,
+  LayoutGrid,
+  XCircle,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CONTRIBUTION_STATUS_OPTIONS } from "@/lib/helpers/contribution-status";
 import { cn } from "@/lib/utils";
 
 // ─── Status config ────────────────────────────────────────────────────────────
@@ -20,27 +29,31 @@ const STATUS_OPTIONS = [
     iconColor: "text-white",
     count: null, // filled dynamically
   },
-  {
-    value: "Selected",
-    label: "Selected",
-    icon: CheckCircle2,
-    iconColor: "text-[#016630]",
-    badgeClass: "bg-[#016630]/10 text-[#016630]",
-  },
-  {
-    value: "Under Review",
-    label: "Under Review",
-    icon: Clock,
-    iconColor: "text-[#B8860B]",
-    badgeClass: "bg-[#FFDF20]/20 text-[#B8860B]",
-  },
-  {
-    value: "Rejected",
-    label: "Rejected",
-    icon: XCircle,
-    iconColor: "text-[#9F0712]",
-    badgeClass: "bg-[#9F0712]/10 text-[#9F0712]",
-  },
+  ...CONTRIBUTION_STATUS_OPTIONS.map((status) => {
+    const iconMap = {
+      pending: Clock,
+      under_review: Eye,
+      submitted: CheckCircle2,
+      flagged_plagiarism: AlertTriangle,
+      rejected: XCircle,
+    };
+
+    const iconColorMap = {
+      pending: "text-amber-700",
+      under_review: "text-sky-700",
+      submitted: "text-emerald-700",
+      flagged_plagiarism: "text-rose-700",
+      rejected: "text-red-700",
+    };
+
+    return {
+      value: status.label,
+      label: status.label,
+      icon: iconMap[status.key] || LayoutGrid,
+      iconColor: iconColorMap[status.key] || "text-slate-600",
+      badgeClass: status.badgeClass,
+    };
+  }),
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────

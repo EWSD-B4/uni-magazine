@@ -27,6 +27,7 @@ export function ContributionBarChart({
   subtitle = "CURRENT ACADEMIC TERM",
   selectedPeriod = "This Semester",
   onPeriodChange,
+  showPeriodSelector = true,
 }) {
   return (
     <Card className="bg-card">
@@ -39,28 +40,30 @@ export function ContributionBarChart({
             {subtitle}
           </p>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="default"
-              size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full text-xs px-3"
-            >
-              {selectedPeriod.toUpperCase()}
-              <ChevronDown className="ml-1 size-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {periods.map((period) => (
-              <DropdownMenuItem
-                key={period}
-                onClick={() => onPeriodChange?.(period)}
+        {showPeriodSelector ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="default"
+                size="sm"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full text-xs px-3"
               >
-                {period}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                {selectedPeriod.toUpperCase()}
+                <ChevronDown className="ml-1 size-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {periods.map((period) => (
+                <DropdownMenuItem
+                  key={period}
+                  onClick={() => onPeriodChange?.(period)}
+                >
+                  {period}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
       </CardHeader>
       <CardContent>
         <div className="h-64 w-full">
