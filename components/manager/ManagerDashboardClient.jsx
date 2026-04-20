@@ -7,34 +7,8 @@ import { StatCard } from "@/components/StatCard";
 import { ContributionBarChart } from "@/components/ContributionBarChart";
 import { StatusCard } from "@/components/StatusCard";
 import { DataTable } from "@/components/DataTable";
-
-const columns = [
-  {
-    key: "id",
-    header: "No.",
-    render: (_value, _row, index) => `${index + 1}.`,
-  },
-  {
-    key: "title",
-    header: "Title",
-    render: (value, row) => (
-      <Link
-        href={`/dashboard/${row.id}`}
-        className="text-foreground font-medium hover:underline"
-      >
-        {String(value)}
-      </Link>
-    ),
-  },
-  {
-    key: "date",
-    header: "Submitted On",
-  },
-  {
-    key: "faculty",
-    header: "Faculty",
-  },
-];
+import { Button } from "@/components/ui/button";
+import { getContributionStatusBadgeClass } from "@/lib/helpers/contribution-status";
 
 export default function ManagerDashboardClient({
   rows,
@@ -46,9 +20,11 @@ export default function ManagerDashboardClient({
   const router = useRouter();
   const [selectedPeriod, setSelectedPeriod] = React.useState("This Week");
   const [downloadError, setDownloadError] = React.useState("");
+  const [isDownloading, setIsDownloading] = React.useState(false);
 
   const handleDownload = React.useCallback(async () => {
     setDownloadError("");
+    setIsDownloading(true);
 
     try {
       const response = await fetch(
@@ -92,6 +68,8 @@ export default function ManagerDashboardClient({
       window.URL.revokeObjectURL(url);
     } catch {
       setDownloadError("Failed to download selected contributions.");
+    } finally {
+      setIsDownloading(false);
     }
   }, []);
 
@@ -101,12 +79,52 @@ export default function ManagerDashboardClient({
         label: "View",
         onClick: (row) => router.push(`/dashboard/${row.id}`),
       },
+    ],
+    [router],
+  );
+
+  const columns = React.useMemo(
+    () => [
       {
-        label: "Download",
-        onClick: handleDownload,
+        key: "id",
+        header: "No.",
+        render: (_value, _row, index) => `${index + 1}.`,
+      },
+      {
+        key: "title",
+        header: "Title",
+        render: (value, row) => (
+          <Link
+            href={`/dashboard/${row.id}`}
+            className="text-foreground font-medium hover:underline"
+          >
+            {String(value)}
+          </Link>
+        ),
+      },
+      {
+        key: "status",
+        header: "Status",
+        render: (value) => (
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+              getContributionStatusBadgeClass(value)
+            }`}
+          >
+            {String(value || "-")}
+          </span>
+        ),
+      },
+      {
+        key: "date",
+        header: "Submitted On",
+      },
+      {
+        key: "faculty",
+        header: "Faculty",
       },
     ],
-    [handleDownload, router],
+    [],
   );
 
   return (
@@ -128,7 +146,7 @@ export default function ManagerDashboardClient({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard label="Total Contributions" value={stats.totalContributions} />
             <StatCard label="Pending Reviews" value={stats.pendingReviews} />
-            <StatCard label="Selected Contributions" value={stats.selectedContributions} />
+            <StatCard label="Submitted Contributions" value={stats.selectedContributions} />
             <StatCard label="Total Faculties" value={stats.totalFaculties} />
           </div>
 
@@ -143,7 +161,19 @@ export default function ManagerDashboardClient({
             <StatusCard statuses={articleStatuses} />
           </div>
 
-          <h3 className="text-2xl font-bold text-foreground mb-8">Contributions</h3>
+          <div className="mb-8 flex items-center justify-between gap-4">
+            <h3 className="text-2xl font-bold text-foreground">Contributions</h3>
+            <Button
+              type="button"
+              onClick={() => {
+                void handleDownload();
+              }}
+              disabled={isDownloading}
+              className="bg-[#f26b5b] text-white hover:bg-[#e55d4f]"
+            >
+              {isDownloading ? "Downloading..." : "Download"}
+            </Button>
+          </div>
           <DataTable
             data={rows}
             columns={columns}

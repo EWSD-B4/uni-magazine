@@ -53,6 +53,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { formatTimestampToMinute } from "@/lib/helpers/date"
 import { cn } from "@/lib/utils"
 
 function fileToDataUrl(file) {
@@ -910,7 +911,7 @@ export default function ArticleEditorForm({ article }) {
           <p>Owner ID: {article.ownerId}</p>
           <p>
             {article.faculty} • {article.readTime} • Published{" "}
-            {article.publishedAt}
+            {formatTimestampToMinute(article.publishedAt)}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">

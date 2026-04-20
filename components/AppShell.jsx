@@ -61,7 +61,18 @@ function SidebarNavItem({
   active,
   collapsed,
   onNavigate,
+  forceHardNavigate = false,
 }) {
+  const handleClick = React.useCallback(
+    (event) => {
+      onNavigate?.()
+      if (!forceHardNavigate) return
+      event.preventDefault()
+      window.location.assign(href)
+    },
+    [forceHardNavigate, href, onNavigate]
+  )
+
   return (
     <Button
       asChild
@@ -71,7 +82,7 @@ function SidebarNavItem({
         active && "bg-slate-800 text-white"
       )}
     >
-      <Link href={href} onClick={onNavigate}>
+      <Link href={href} onClick={handleClick}>
         <Icon className="size-4" />
         {!collapsed ? <span>{label}</span> : null}
       </Link>
@@ -197,6 +208,7 @@ function SidebarContent({
             collapsed={collapsed}
             active={isDashboardHome(pathname)}
             onNavigate={onNavigate}
+            forceHardNavigate
           />
         ) : null}
         {showArticlesNav ? (

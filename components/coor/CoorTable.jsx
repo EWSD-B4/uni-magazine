@@ -4,28 +4,19 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { StatCard } from "@/components/StatCard";
-import { ContributionBarChart } from "@/components/ContributionBarChart";
-import { StatusCard } from "@/components/StatusCard";
 import { DataTable } from "@/components/DataTable";
 import { UrgentTasksBanner } from "@/components/UrgentTasksBanner";
 import { StatusFilter } from "@/components/StatusFilter";
 import SubmissionDeadlinesSection from "@/components/student/SubmissionDeadlinesSection";
+import {
+  getContributionStatusBadgeClass,
+  getContributionStatusLabel,
+} from "@/lib/helpers/contribution-status";
 
 function asString(value, fallback = "") {
   if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
   return fallback;
-}
-
-function normalizeStatus(value) {
-  const raw = asString(value).trim();
-  if (!raw) return "-";
-
-  const normalized = raw.toLowerCase();
-  if (normalized === "approved" || normalized === "selected") return "Selected";
-  if (normalized === "rejected") return "Rejected";
-  if (normalized === "pending" || normalized === "under review") return "Under Review";
-  return raw;
 }
 
 function normalizePlagiarismStatus(value) {
@@ -76,8 +67,13 @@ function extractTotalGuests(payload) {
 }
 
 function normalizeContributionRow(item, index) {
+  const hasRawStatusField =
+    item &&
+    typeof item === "object" &&
+    (Object.prototype.hasOwnProperty.call(item, "status") ||
+      Object.prototype.hasOwnProperty.call(item, "state"));
   const hasStatusField =
-    item && typeof item === "object" && Object.prototype.hasOwnProperty.call(item, "status");
+    hasRawStatusField;
   const plagiarismStatus = normalizePlagiarismStatus(
     item?.plagiarismStatus ??
       item?.plagiarism_status ??
@@ -92,7 +88,7 @@ function normalizeContributionRow(item, index) {
     id: asString(item?.id ?? item?.contributionId ?? item?.articleId ?? index + 1),
     title: asString(item?.title ?? item?.name ?? item?.articleTitle, "Untitled"),
     faculty: asString(item?.faculty?.facultyName ?? item?.faculty ?? "N/A"),
-    statues: hasStatusField ? normalizeStatus(item?.status) : "",
+    statues: hasStatusField ? getContributionStatusLabel(item?.status ?? item?.state) : "",
     hasStatusField,
     plagiarismStatus,
     date: toDisplayDate(
@@ -107,7 +103,6 @@ export default function CoorTable({
   deadlines,
 }) {
   const router = useRouter();
-  const [selectedPeriod, setSelectedPeriod] = React.useState("This Week");
   const [statusFilter, setStatusFilter] = React.useState("All Statuses");
 
   const allRows = React.useMemo(() => {
@@ -166,22 +161,15 @@ export default function CoorTable({
       mapped.push({
         key: "statues",
         header: "Status",
-        render: (value) => {
-          const map = {
-            Selected: "bg-[#016630]/10 text-[#016630]",
-            "Under Review": "bg-[#FFDF20]/20 text-[#B8860B]",
-            Rejected: "bg-[#9F0712]/10 text-[#9F0712]",
-          };
-          return (
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                map[value] ?? "bg-slate-100 text-slate-600"
-              }`}
-            >
-              {asString(value, "-")}
-            </span>
-          );
-        },
+        render: (value) => (
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+              getContributionStatusBadgeClass(value)
+            }`}
+          >
+            {asString(value, "-")}
+          </span>
+        ),
       });
     }
 
@@ -200,50 +188,6 @@ export default function CoorTable({
 
     return mapped;
   }, [showPlagiarismStatus, showStatus]);
-
-  const chartData = React.useMemo(() => {
-    const colorPalette = ["#F26454CC", "#22C55ECC", "#FBBF24CC", "#3B82F6CC", "#A855F7CC"];
-    const byFaculty = new Map();
-
-    allRows.forEach((row) => {
-      const key = asString(row.faculty, "N/A");
-      byFaculty.set(key, (byFaculty.get(key) || 0) + 1);
-    });
-
-    return Array.from(byFaculty.entries())
-      .map(([name, contributions], index) => ({
-        name,
-        contributions,
-        color: colorPalette[index % colorPalette.length],
-      }))
-      .sort((a, b) => b.contributions - a.contributions)
-      .slice(0, 6);
-  }, [allRows]);
-
-  const articleStatuses = React.useMemo(() => {
-    const total = allRows.length || 1;
-    const selected = allRows.filter((row) => row.statues === "Selected").length;
-    const underReview = allRows.filter((row) => row.statues === "Under Review").length;
-    const rejected = allRows.filter((row) => row.statues === "Rejected").length;
-
-    return [
-      {
-        label: "Selected",
-        percentage: Math.round((selected / total) * 100),
-        color: "#016630",
-      },
-      {
-        label: "Under Review",
-        percentage: Math.round((underReview / total) * 100),
-        color: "#FFDF20",
-      },
-      {
-        label: "Rejected",
-        percentage: Math.round((rejected / total) * 100),
-        color: "#9F0712",
-      },
-    ];
-  }, [allRows]);
 
   const totalGuests = React.useMemo(
     () => extractTotalGuests(contributionsPayload),
@@ -302,28 +246,16 @@ export default function CoorTable({
               value={allRows.filter((row) => row.statues === "Under Review").length}
             />
             <StatCard
-              label="Selected Contributions"
-              value={allRows.filter((row) => row.statues === "Selected").length}
+              label="Submitted"
+              value={allRows.filter((row) => row.statues === "Submitted").length}
             />
             <StatCard label="Total Guests" value={totalGuests} />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <ContributionBarChart
-                title="Weekly Contribution Distribution"
-                data={chartData}
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={setSelectedPeriod}
-              />
-            </div>
-            <StatusCard statuses={articleStatuses} />
           </div>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-2xl font-bold text-foreground">
-                Selected Contributions
+                Contributions
               </h3>
               {showStatus ? (
                 <StatusFilter

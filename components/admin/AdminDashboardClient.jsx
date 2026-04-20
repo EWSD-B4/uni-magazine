@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { MostViewedPage } from "@/components/MostViewedPage";
 import { MostActiveUsers } from "@/components/MostActiveUsers";
 import { BrowserUsageChart } from "@/components/BrowserUsageChart";
@@ -13,8 +12,6 @@ export default function AdminDashboardClient({
   contributionChart,
   loadError,
 }) {
-  const [selectedPeriod, setSelectedPeriod] = React.useState("This Semester");
-
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fafc,_#eef2f6_60%,_#e2e8f0_100%)]">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
@@ -40,8 +37,7 @@ export default function AdminDashboardClient({
                 <BrowserUsageChart data={browserUsage} />
                 <ContributionBarChart
                   data={contributionChart}
-                  selectedPeriod={selectedPeriod}
-                  onPeriodChange={setSelectedPeriod}
+                  showPeriodSelector={false}
                 />
               </div>
             </main>

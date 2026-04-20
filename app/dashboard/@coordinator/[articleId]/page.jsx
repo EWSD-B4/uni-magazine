@@ -23,6 +23,7 @@ import {
   normalizeImages,
   unwrapPayload,
 } from "@/lib/helpers/contribution";
+import { formatTimestampToMinute } from "@/lib/helpers/date";
 
 function extractComments(payload) {
   const source = unwrapPayload(payload);
@@ -48,14 +49,6 @@ function extractComments(payload) {
   return [];
 }
 
-function toReadableDate(value) {
-  const raw = asString(value);
-  if (!raw) return "N/A";
-  const date = new Date(raw);
-  if (Number.isNaN(date.getTime())) return raw;
-  return date.toISOString();
-}
-
 function normalizeComment(item, index) {
   const body = asString(
     item?.comment || item?.content || item?.message || item?.text,
@@ -74,7 +67,7 @@ function normalizeComment(item, index) {
         item?.name,
       "Coordinator",
     ),
-    date: toReadableDate(
+    date: formatTimestampToMinute(
       item?.createdAt || item?.updatedAt || item?.timestamp || item?.date,
     ),
   };
@@ -122,14 +115,14 @@ export default async function CoordinatorContributionDetailPage({ params }) {
       contribution?.name,
     "Unknown",
   );
-  const publishedAt =
-    asString(
-      contribution?.timestamp ||
-        metadata?.processedAt ||
-        contribution?.publishedAt ||
-        contribution?.publishDate ||
-        contribution?.createdAt,
-    ) || "N/A";
+  const publishedAt = formatTimestampToMinute(
+    contribution?.timestamp ||
+      metadata?.processedAt ||
+      contribution?.publishedAt ||
+      contribution?.publishDate ||
+      contribution?.createdAt,
+    "N/A",
+  );
   const contributionId = asString(
     contribution?.contributionId || contribution?.id || articleId,
   );
