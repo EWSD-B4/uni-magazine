@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import ArticleCarousel from "@/components/ArticleCarousel";
 import ArticleRichContent from "@/components/ArticleRichContent";
-import ManagerSelectedDownloadButton from "@/components/manager/ManagerSelectedDownloadButton";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -97,7 +96,6 @@ export default async function ManagerContributionDetailPage({ params }) {
           <Button variant="outline" asChild>
             <Link href="/dashboard">Back to dashboard</Link>
           </Button>
-          <ManagerSelectedDownloadButton />
         </div>
       </header>
 
