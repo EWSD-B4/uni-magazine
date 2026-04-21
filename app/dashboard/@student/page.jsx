@@ -1,4 +1,5 @@
 import StudentDashboardClient from "@/components/student/StudentDashboardClient";
+import { unstable_noStore as noStore } from "next/cache";
 import { getContributionListing } from "@/lib/actions/contribution.action";
 import { getCurrentAcademicYearDeadlines } from "@/lib/actions/student.action";
 import { requireAuthSession } from "@/lib/auth";
@@ -126,6 +127,7 @@ function normalizeContributionRow(item, index) {
 }
 
 export default async function StudentDashboardPage() {
+  noStore();
   const session = await requireAuthSession();
   if (session.role !== "student") {
     return null;
