@@ -2,9 +2,16 @@ const path = require("path")
 require("dotenv").config({ path: ".env.dev" })
 
 /** @type {import("next").NextConfig} */
+const actionBodyLimit = "50mb"
+
 const nextConfig = {
   serverActions: {
-    bodySizeLimit: "50mb",
+    bodySizeLimit: actionBodyLimit,
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: actionBodyLimit,
+    },
   },
   images: {
     remotePatterns: [

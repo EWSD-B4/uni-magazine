@@ -120,7 +120,7 @@ function buildChartData(rows) {
 
 function buildStatusData(rows) {
   const total = rows.length || 1;
-  const submitted = rows.filter((row) => row.status === "Submitted").length;
+  const selected = rows.filter((row) => row.status === "Selected").length;
   const underReview = rows.filter(
     (row) => row.status === "Under Review" || row.status === "Pending",
   ).length;
@@ -128,8 +128,8 @@ function buildStatusData(rows) {
 
   return [
     {
-      label: "Submitted",
-      percentage: Math.round((submitted / total) * 100),
+      label: "Selected",
+      percentage: Math.round((selected / total) * 100),
       color: "#059669",
     },
     {
@@ -180,7 +180,7 @@ export default async function ManagerDashboardPage() {
         pendingReviews: tableRows.filter(
           (row) => row.status === "Under Review" || row.status === "Pending",
         ).length,
-        selectedContributions: tableRows.filter((row) => row.status === "Submitted").length,
+        selectedContributions: tableRows.filter((row) => row.status === "Selected").length,
         totalFaculties: new Set(tableRows.map((row) => row.faculty)).size,
       }}
       loadError={loadErrors.join(" ")}

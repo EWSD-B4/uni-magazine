@@ -246,8 +246,8 @@ export default function CoorTable({
               value={allRows.filter((row) => row.statues === "Under Review").length}
             />
             <StatCard
-              label="Submitted"
-              value={allRows.filter((row) => row.statues === "Submitted").length}
+              label="Selected"
+              value={allRows.filter((row) => row.statues === "Selected").length}
             />
             <StatCard label="Total Guests" value={totalGuests} />
           </div>
