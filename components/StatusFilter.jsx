@@ -33,6 +33,7 @@ const STATUS_OPTIONS = [
     const iconMap = {
       pending: Clock,
       under_review: Eye,
+      submitted: CheckCircle2,
       selected: CheckCircle2,
       flagged_plagiarism: AlertTriangle,
       rejected: XCircle,
@@ -41,6 +42,7 @@ const STATUS_OPTIONS = [
     const iconColorMap = {
       pending: "text-amber-700",
       under_review: "text-sky-700",
+      submitted: "text-emerald-700",
       selected: "text-emerald-700",
       flagged_plagiarism: "text-rose-700",
       rejected: "text-red-700",

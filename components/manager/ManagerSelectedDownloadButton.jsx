@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
+import { OrangeCircleLoader } from "@/components/ui/orange-circle-loader";
 
 export default function ManagerSelectedDownloadButton({
   label = "Download",
@@ -70,7 +71,14 @@ export default function ManagerSelectedDownloadButton({
           void handleDownload();
         }}
       >
-        {isDownloading ? "Preparing download..." : label}
+        {isDownloading ? (
+          <span className="inline-flex items-center gap-2">
+            <OrangeCircleLoader size="sm" />
+            Preparing download...
+          </span>
+        ) : (
+          label
+        )}
       </Button>
       {error ? (
         <p className="text-sm font-medium text-amber-700">{error}</p>

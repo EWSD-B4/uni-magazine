@@ -8,6 +8,7 @@ import { updateContribution } from "@/lib/actions/student.action";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { OrangeCircleLoader } from "@/components/ui/orange-circle-loader";
 
 const MAX_IMAGES = 5;
 
@@ -324,7 +325,14 @@ export default function StudentContributionEditForm({
           </p>
         </div>
         <Button type="submit" onClick={handleSaveClick} disabled={isPending}>
-          {isPending ? "Saving..." : "Save changes"}
+          {isPending ? (
+            <span className="inline-flex items-center gap-2">
+              <OrangeCircleLoader size="sm" />
+              Saving...
+            </span>
+          ) : (
+            "Save changes"
+          )}
         </Button>
       </div>
 

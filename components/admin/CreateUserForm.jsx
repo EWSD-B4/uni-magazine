@@ -7,6 +7,7 @@ import { createUserAction } from "@/lib/actions/admin.action";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { OrangeCircleLoader } from "@/components/ui/orange-circle-loader";
 import {
   Select,
   SelectContent,
@@ -24,6 +25,14 @@ function uniqueSorted(items) {
   return [...new Set(items.filter(Boolean))].sort((a, b) =>
     String(a).localeCompare(String(b)),
   );
+}
+
+function roleRequiresFacultyByLabel(roleLabel) {
+  const normalized = String(roleLabel || "").trim().toLowerCase();
+  if (!normalized) return true;
+  if (normalized === "admin") return false;
+  if (normalized.includes("manager")) return false;
+  return true;
 }
 
 export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
@@ -81,6 +90,8 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
   const roleLabelLookup = useMemo(() => {
     return new Map(roleSelectOptions.map((item) => [item.id, item.label]));
   }, [roleSelectOptions]);
+  const selectedRoleLabel = roleLabelLookup.get(roleId) || "";
+  const isFacultyRequired = roleRequiresFacultyByLabel(selectedRoleLabel);
 
   const fallbackFacultyNames = useMemo(
     () =>
@@ -109,7 +120,7 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
       return;
     }
 
-    if (!facultyId) {
+    if (isFacultyRequired && !facultyId) {
       event.preventDefault();
       setClientError("Please select faculty_id.");
       return;
@@ -202,7 +213,11 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
                 <Label>Faculty</Label>
                 {facultyOptions.some((item) => item.id) ? (
                   <>
-                    <Select value={facultyId} onValueChange={setFacultyId}>
+                    <Select
+                      value={facultyId}
+                      onValueChange={setFacultyId}
+                      disabled={!isFacultyRequired}
+                    >
                       <SelectTrigger className="w-full bg-white">
                         <SelectValue placeholder="Select faculty" />
                       </SelectTrigger>
@@ -213,10 +228,14 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
                             <SelectItem key={item.id} value={item.id}>
                               {item.name}
                             </SelectItem>
-                          ))}
+                        ))}
                       </SelectContent>
                     </Select>
-                    <input type="hidden" name="faculty_id" value={facultyId} />
+                    <input
+                      type="hidden"
+                      name="faculty_id"
+                      value={isFacultyRequired ? facultyId : ""}
+                    />
                   </>
                 ) : (
                   <Input
@@ -227,8 +246,14 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
                     onChange={(event) => setFacultyId(event.target.value)}
                     placeholder="Enter faculty_id"
                     className="bg-white"
+                    disabled={!isFacultyRequired}
                   />
                 )}
+                {!isFacultyRequired ? (
+                  <p className="text-xs text-slate-600">
+                    Faculty is optional for this role.
+                  </p>
+                ) : null}
                 {!facultyOptions.some((item) => item.id) &&
                 fallbackFacultyNames.length ? (
                   <p className="text-xs text-slate-600">
@@ -254,6 +279,7 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
                       </SelectContent>
                     </Select>
                     <input type="hidden" name="role_id" value={roleId} />
+                    <input type="hidden" name="role_label" value={selectedRoleLabel} />
                   </>
                 ) : (
                   <Input
@@ -338,7 +364,14 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
               disabled={isPending}
               className="rounded-full bg-[#f26b5b] px-10 text-lg text-black hover:bg-[#e55d4f]"
             >
-              {isPending ? "Creating..." : "Create Account"}
+              {isPending ? (
+                <span className="inline-flex items-center gap-2">
+                  <OrangeCircleLoader size="sm" />
+                  Creating...
+                </span>
+              ) : (
+                "Create Account"
+              )}
             </Button>
           </div>
         </form>

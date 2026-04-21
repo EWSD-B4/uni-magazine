@@ -8,6 +8,7 @@ import { ContributionBarChart } from "@/components/ContributionBarChart";
 import { StatusCard } from "@/components/StatusCard";
 import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
+import { OrangeCircleLoader } from "@/components/ui/orange-circle-loader";
 import { getContributionStatusBadgeClass } from "@/lib/helpers/contribution-status";
 
 export default function ManagerDashboardClient({
@@ -169,7 +170,14 @@ export default function ManagerDashboardClient({
               disabled={isDownloading}
               className="bg-[#f26b5b] text-white hover:bg-[#e55d4f]"
             >
-              {isDownloading ? "Downloading..." : "Download"}
+              {isDownloading ? (
+                <span className="inline-flex items-center gap-2">
+                  <OrangeCircleLoader size="sm" />
+                  Downloading...
+                </span>
+              ) : (
+                "Download"
+              )}
             </Button>
           </div>
           <DataTable
