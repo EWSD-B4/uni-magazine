@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   CirclePlus,
   GraduationCap,
+  KeyRound,
   LayoutGrid,
   LogIn,
   LogOut,
@@ -32,6 +33,10 @@ function isLoginPath(pathname) {
 
 function isLandingPath(pathname) {
   return pathname === "/" || pathname === ""
+}
+
+function isForgetPasswordPath(pathname) {
+  return pathname === "/forget-password" || pathname === "/forget-password/"
 }
 
 function formatUserName(session) {
@@ -131,7 +136,7 @@ function SidebarContent({
   logoHref,
   canCreateArticle,
   createHref,
-  adminQuickLinks,
+  quickLinks,
   showDashboardNav,
   showArticlesNav,
   pathname,
@@ -233,7 +238,7 @@ function SidebarContent({
           />
         ) : null}
 
-        {adminQuickLinks.map((item) => (
+        {quickLinks.map((item) => (
           <QuickActionButton
             key={item.href}
             href={item.href}
@@ -305,6 +310,7 @@ export default function AppShell({ children, session }) {
   if (
     isArticleDetailPath(pathname) ||
     isLoginPath(pathname) ||
+    isForgetPasswordPath(pathname) ||
     isLandingPath(pathname)
   ) {
     return children
@@ -318,8 +324,9 @@ export default function AppShell({ children, session }) {
   const showDashboardNav = !isGuest
   const showArticlesNav = isGuest
   const logoHref = hasSession ? (isGuest ? "/articles" : "/dashboard") : "/"
-  const adminQuickLinks =
-    hasSession && role === "admin"
+  const quickLinks = !hasSession
+    ? []
+    : role === "admin"
       ? [
           {
             href: "/dashboard/user-management",
@@ -337,7 +344,15 @@ export default function AppShell({ children, session }) {
             icon: Building2,
           },
         ]
-      : []
+      : role === "student"
+        ? [
+            {
+              href: "/dashboard/change-password",
+              label: "Change Password",
+              icon: KeyRound,
+            },
+          ]
+        : []
   const userName = formatUserName(session)
 
   return (
@@ -363,7 +378,7 @@ export default function AppShell({ children, session }) {
           logoHref={logoHref}
           canCreateArticle={canCreateArticle}
           createHref={createHref}
-          adminQuickLinks={adminQuickLinks}
+          quickLinks={quickLinks}
           showDashboardNav={showDashboardNav}
           showArticlesNav={showArticlesNav}
           pathname={pathname}
@@ -426,7 +441,7 @@ export default function AppShell({ children, session }) {
             logoHref={logoHref}
             canCreateArticle={canCreateArticle}
             createHref={createHref}
-            adminQuickLinks={adminQuickLinks}
+            quickLinks={quickLinks}
             showDashboardNav={showDashboardNav}
             showArticlesNav={showArticlesNav}
             pathname={pathname}

@@ -6,6 +6,15 @@ import { Plus } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { StatCard } from "@/components/StatCard";
 import { Button } from "@/components/ui/button";
+import { resetUserPasswordAction } from "@/lib/actions/admin.action";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const columns = [
   { key: "id", header: "No.", render: (_, __, index) => `${index + 1}.` },
@@ -45,6 +54,13 @@ export default function UserTable({ initialUsers = [], faculties = [] }) {
   );
   const [selectedRole, setSelectedRole] = useState("All Roles");
   const [selectedFaculty, setSelectedFaculty] = useState("All Faculties");
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [resetTargetUser, setResetTargetUser] = useState(null);
+  const [resetFeedback, setResetFeedback] = useState({
+    type: "",
+    message: "",
+  });
 
   const roles = useMemo(
     () => ["All Roles", ...uniqueSorted(users.map((user) => user.role))],
@@ -72,10 +88,54 @@ export default function UserTable({ initialUsers = [], faculties = [] }) {
     [users, selectedRole, selectedFaculty],
   );
 
+  function openResetPasswordModal(row) {
+    const targetId = String(row?.id || "").trim();
+    if (!targetId) return;
+    setResetTargetUser({
+      id: targetId,
+      name: String(row?.name || "").trim(),
+      email: String(row?.email || "").trim(),
+    });
+    setResetModalOpen(true);
+  }
+
+  async function handleConfirmResetPassword() {
+    const targetId = String(resetTargetUser?.id || "").trim();
+    if (!targetId) {
+      setResetFeedback({
+        type: "error",
+        message: "Missing user id.",
+      });
+      return;
+    }
+
+    setIsResettingPassword(true);
+    try {
+      const result = await resetUserPasswordAction(targetId);
+      setResetFeedback({
+        type: result?.ok ? "success" : "error",
+        message: result?.message || "Failed to reset password.",
+      });
+      if (result?.ok) {
+        setResetModalOpen(false);
+      }
+    } catch {
+      setResetFeedback({
+        type: "error",
+        message: "Failed to reset password.",
+      });
+    } finally {
+      setIsResettingPassword(false);
+    }
+  }
+
   const tableActions = [
     {
       label: "Reset Password",
-      onClick: (row) => router.push(`/dashboard/reset-password/${row.id}`),
+      onClick: (row) => {
+        if (isResettingPassword) return;
+        openResetPasswordModal(row);
+      },
     },
     {
       label: "Edit Account",
@@ -139,12 +199,78 @@ export default function UserTable({ initialUsers = [], faculties = [] }) {
         </select>
       </div>
 
+      {resetFeedback.message ? (
+        <p
+          className={`rounded-md border px-4 py-2 text-sm ${
+            resetFeedback.type === "success"
+              ? "border-green-300 bg-green-50 text-green-700"
+              : "border-red-300 bg-red-50 text-red-700"
+          }`}
+        >
+          {resetFeedback.message}
+        </p>
+      ) : null}
+
       <DataTable
         data={filteredUsers}
         columns={columns}
         pageSize={6}
         actions={tableActions}
       />
+
+      <Dialog
+        open={resetModalOpen}
+        onOpenChange={(open) => {
+          if (isResettingPassword) return;
+          setResetModalOpen(open);
+        }}
+      >
+        <DialogContent className="max-w-md border-slate-300 bg-[#f8f4ec]">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription className="text-slate-600">
+              This will generate a new password/reset flow for this user.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+            <p>
+              <span className="font-semibold">User ID:</span>{" "}
+              {resetTargetUser?.id || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Name:</span>{" "}
+              {resetTargetUser?.name || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Email:</span>{" "}
+              {resetTargetUser?.email || "-"}
+            </p>
+          </div>
+
+          <DialogFooter className="sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isResettingPassword}
+              className="border-slate-300"
+              onClick={() => setResetModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={isResettingPassword}
+              className="bg-[#f26b5b] text-white hover:bg-[#e55d4f]"
+              onClick={() => {
+                void handleConfirmResetPassword();
+              }}
+            >
+              {isResettingPassword ? "Resetting..." : "Confirm Reset"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

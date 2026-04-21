@@ -2,6 +2,8 @@ const path = require("path")
 require("dotenv").config({ path: ".env.dev" })
 
 /** @type {import("next").NextConfig} */
+const actionBodyLimit = "50mb"
+
 const nextConfig = {
   output: "standalone",
   experimental: {

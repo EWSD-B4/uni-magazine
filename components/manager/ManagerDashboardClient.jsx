@@ -145,7 +145,7 @@ export default function ManagerDashboardClient({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard label="Total Contributions" value={stats.totalContributions} />
             <StatCard label="Pending Reviews" value={stats.pendingReviews} />
-            <StatCard label="Submitted Contributions" value={stats.selectedContributions} />
+            <StatCard label="Selected Contributions" value={stats.selectedContributions} />
             <StatCard label="Total Faculties" value={stats.totalFaculties} />
           </div>
 
