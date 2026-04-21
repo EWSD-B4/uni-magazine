@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { changePasswordAction } from "@/lib/actions/auth";
+import { OrangeCircleLoader } from "@/components/ui/orange-circle-loader";
 
 const INITIAL_STATE = {
   ok: false,
@@ -113,9 +114,16 @@ export default function StudentChangePasswordForm() {
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-full bg-[#f26b5b] px-10 py-3 font-semibold text-white disabled:opacity-70"
+              className="inline-flex items-center justify-center rounded-full bg-[#f26b5b] px-10 py-3 font-semibold text-white disabled:opacity-70"
             >
-              {isPending ? "Saving..." : "Confirm Password"}
+              {isPending ? (
+                <span className="inline-flex items-center gap-2">
+                  <OrangeCircleLoader size="sm" />
+                  Saving...
+                </span>
+              ) : (
+                "Confirm Password"
+              )}
             </button>
           </div>
         </form>

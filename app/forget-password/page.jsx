@@ -7,6 +7,7 @@ import Link from "next/link";
 import { forgetPasswordAction } from "@/lib/actions/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { OrangeCircleLoader } from "@/components/ui/orange-circle-loader";
 
 const INITIAL_STATE = {
   ok: false,
@@ -61,7 +62,14 @@ export default function ForgetPasswordPage() {
           disabled={isPending}
           className="h-12 w-full rounded-full bg-[#f05c4c] text-base text-white hover:bg-[#e14d3f]"
         >
-          {isPending ? "Sending..." : "Send Reset Link"}
+          {isPending ? (
+            <span className="inline-flex items-center gap-2">
+              <OrangeCircleLoader size="sm" />
+              Sending...
+            </span>
+          ) : (
+            "Send Reset Link"
+          )}
         </Button>
 
         <Button
