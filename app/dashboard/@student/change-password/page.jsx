@@ -1,11 +1,5 @@
-import StudentChangePasswordForm from "@/components/student/StudentChangePasswordForm";
-import { requireAuthSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function StudentChangePasswordPage() {
-  const session = await requireAuthSession();
-  if (session.role !== "student") {
-    return null;
-  }
-
-  return <StudentChangePasswordForm />;
+  redirect("/reset-password");
 }

@@ -326,33 +326,32 @@ export default function AppShell({ children, session }) {
   const logoHref = hasSession ? (isGuest ? "/articles" : "/dashboard") : "/"
   const quickLinks = !hasSession
     ? []
-    : role === "admin"
-      ? [
-          {
-            href: "/dashboard/user-management",
-            label: "User Management",
-            icon: UserCog,
-          },
-          {
-            href: "/dashboard/academic-management",
-            label: "Academic Management",
-            icon: GraduationCap,
-          },
-          {
-            href: "/dashboard/faculty-management",
-            label: "Faculty Management",
-            icon: Building2,
-          },
-        ]
-      : role === "student"
-        ? [
-            {
-              href: "/dashboard/change-password",
-              label: "Change Password",
-              icon: KeyRound,
-            },
-          ]
-        : []
+    : [
+        {
+          href: "/reset-password",
+          label: "Change Password",
+          icon: KeyRound,
+        },
+        ...(role === "admin"
+          ? [
+              {
+                href: "/dashboard/user-management",
+                label: "User Management",
+                icon: UserCog,
+              },
+              {
+                href: "/dashboard/academic-management",
+                label: "Academic Management",
+                icon: GraduationCap,
+              },
+              {
+                href: "/dashboard/faculty-management",
+                label: "Faculty Management",
+                icon: Building2,
+              },
+            ]
+          : []),
+      ]
   const userName = formatUserName(session)
 
   return (

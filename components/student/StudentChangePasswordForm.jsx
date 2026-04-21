@@ -12,7 +12,7 @@ const INITIAL_STATE = {
   message: "",
 };
 
-export default function StudentChangePasswordForm() {
+export default function StudentChangePasswordForm({ backHref = "/dashboard" }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -41,7 +41,7 @@ export default function StudentChangePasswordForm() {
   return (
     <div className="min-h-screen bg-[#e8e3dc] px-6 py-8">
       <Link
-        href="/dashboard"
+        href={backHref}
         className="mb-10 flex w-fit items-center gap-2 rounded-full bg-[#f26b5b] px-6 py-3 text-white"
       >
         <ArrowLeft size={18} />
