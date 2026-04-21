@@ -86,12 +86,16 @@ export default async function ArticlesPage() {
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
             ) : null}
-            <Button variant="ghost" asChild>
-              <Link href="/statistics">Statistics</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/terms">Terms</Link>
-            </Button>
+            {viewer.role !== "guest" ? (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link href="/statistics">Statistics</Link>
+                </Button>
+                <Button variant="ghost" asChild>
+                  <Link href="/terms">Terms</Link>
+                </Button>
+              </>
+            ) : null}
           </div>
         </header>
 
