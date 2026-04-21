@@ -27,14 +27,6 @@ function uniqueSorted(items) {
   );
 }
 
-function roleRequiresFacultyByLabel(roleLabel) {
-  const normalized = String(roleLabel || "").trim().toLowerCase();
-  if (!normalized) return true;
-  if (normalized === "admin") return false;
-  if (normalized.includes("manager")) return false;
-  return true;
-}
-
 export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
   const router = useRouter();
 
@@ -73,12 +65,18 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
         if (!role || typeof role !== "object") return null;
         const id = String(role.id ?? "").trim();
         const label = String(role.label ?? "").trim();
+        const requiresFacultyRaw =
+          role.requiresFaculty ?? role.requires_faculty;
+        const requiresFaculty =
+          typeof requiresFacultyRaw === "boolean"
+            ? requiresFacultyRaw
+            : String(requiresFacultyRaw || "").trim().toLowerCase() === "true";
         if (!id || !label) return null;
-        return { id, label };
+        return { id, label, requiresFaculty };
       })
       .filter(Boolean);
 
-    return normalized.sort((a, b) => a.label.localeCompare(b.label));
+    return normalized.sort((a, b) => Number(a.id) - Number(b.id));
   }, [roleOptions]);
 
   const facultyNameLookup = useMemo(() => {
@@ -90,8 +88,14 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
   const roleLabelLookup = useMemo(() => {
     return new Map(roleSelectOptions.map((item) => [item.id, item.label]));
   }, [roleSelectOptions]);
-  const selectedRoleLabel = roleLabelLookup.get(roleId) || "";
-  const isFacultyRequired = roleRequiresFacultyByLabel(selectedRoleLabel);
+  const selectedRoleOption = useMemo(
+    () => roleSelectOptions.find((item) => item.id === roleId) || null,
+    [roleSelectOptions, roleId],
+  );
+  const selectedRoleLabel = selectedRoleOption?.label || "";
+  const isFacultyRequired = selectedRoleOption
+    ? selectedRoleOption.requiresFaculty
+    : true;
 
   const fallbackFacultyNames = useMemo(
     () =>
@@ -280,6 +284,11 @@ export default function CreateUserForm({ faculties = [], roleOptions = [] }) {
                     </Select>
                     <input type="hidden" name="role_id" value={roleId} />
                     <input type="hidden" name="role_label" value={selectedRoleLabel} />
+                    <input
+                      type="hidden"
+                      name="requires_faculty"
+                      value={isFacultyRequired ? "true" : "false"}
+                    />
                   </>
                 ) : (
                   <Input
