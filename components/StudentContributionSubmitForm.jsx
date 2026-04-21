@@ -7,6 +7,7 @@ import { FileText, Images, Upload, X } from "lucide-react";
 import { submitContribution } from "@/lib/actions/student.action";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { OrangeCircleLoader } from "@/components/ui/orange-circle-loader";
 
 const MAX_IMAGES = 5;
 
@@ -323,8 +324,17 @@ export default function StudentContributionSubmitForm() {
         disabled={isPending}
         className="h-11 rounded-full bg-red-500 px-6 hover:bg-red-600"
       >
-        <Upload className="mr-2 size-4" />
-        {isPending ? "Submitting..." : "Submit Contribution"}
+        {isPending ? (
+          <span className="inline-flex items-center gap-2">
+            <OrangeCircleLoader size="sm" />
+            Submitting...
+          </span>
+        ) : (
+          <>
+            <Upload className="mr-2 size-4" />
+            Submit Contribution
+          </>
+        )}
       </Button>
     </form>
   );

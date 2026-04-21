@@ -56,10 +56,11 @@ function toArticleCard(item, index) {
 
 export default async function ArticlesPage() {
   const viewer = await requireAuthSession();
+  const isGuestView = viewer.role === "guest";
 
   const payload =
-    viewer.role === "guest"
-      ? await getGuestSelectedContributionListing(viewer.facultyId)
+    isGuestView
+      ? await getGuestSelectedContributionListing()
       : await getContributionListing("student");
   const rawList = extractContributionList(payload);
   const articles = rawList.map((item, index) => toArticleCard(item, index));
@@ -105,44 +106,84 @@ export default async function ArticlesPage() {
         {articles.length ? (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {articles.map((article, index) => (
-              <Card
-                key={article.id}
-                className="animate-in slide-in-from-bottom-4 overflow-hidden border-slate-200/80 bg-white/90 shadow-lg fade-in duration-700"
-                style={{ animationDelay: `${index * 80}ms` }}
-              >
-                <div className="relative aspect-[16/10]">
-                  <Image
-                    src={article.image.src}
-                    alt={article.image.alt}
-                    fill
-                    className="object-cover"
-                    sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
-                  />
-                </div>
-                <CardHeader className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1">
-                      {article.faculty}
+              isGuestView ? (
+                <Card
+                  key={article.id}
+                  className="animate-in slide-in-from-bottom-4 overflow-hidden rounded-2xl border-slate-200/90 bg-white/95 shadow-sm fade-in duration-700 transition hover:-translate-y-0.5 hover:shadow-md"
+                  style={{ animationDelay: `${index * 80}ms` }}
+                >
+                  <div className="h-1 w-full bg-gradient-to-r from-[#f26b5b] via-[#f8a18e] to-[#f26b5b]" />
+                  <CardHeader className="space-y-4 pb-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <div className="flex flex-wrap items-center gap-2 text-slate-600">
+                        <span className="rounded-full bg-[#f26b5b]/10 px-2.5 py-1 font-semibold text-[#c65345]">
+                          {article.faculty}
+                        </span>
+                        <span className="rounded-full bg-slate-100 px-2.5 py-1 font-medium">
+                          {article.section}
+                        </span>
+                      </div>
+                      <span className="text-slate-500">{article.readTime}</span>
+                    </div>
+                    <CardTitle className="text-xl leading-snug text-slate-900">
+                      {article.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm leading-6 text-slate-600">
+                      {article.excerpt}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-between gap-3 pt-1">
+                    <span className="truncate text-xs text-slate-500">
+                      {article.author}
                     </span>
-                    <span>{article.section}</span>
+                    <Button
+                      className="rounded-full bg-[#f26b5b] px-5 text-white hover:bg-[#e55d4f]"
+                      asChild
+                    >
+                      <Link href={`/articles/${article.id}`}>Read article</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card
+                  key={article.id}
+                  className="animate-in slide-in-from-bottom-4 overflow-hidden border-slate-200/80 bg-white/90 shadow-lg fade-in duration-700"
+                  style={{ animationDelay: `${index * 80}ms` }}
+                >
+                  <div className="relative aspect-[16/10]">
+                    <Image
+                      src={article.image.src}
+                      alt={article.image.alt}
+                      fill
+                      className="object-cover"
+                      sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
+                    />
                   </div>
-                  <CardTitle className="text-xl leading-snug">
-                    {article.title}
-                  </CardTitle>
-                  <CardDescription className="text-sm leading-6">
-                    {article.excerpt}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between text-xs text-slate-500">
-                    <span>{article.author}</span>
-                    <span>{article.readTime}</span>
-                  </div>
-                  <Button className="w-full" asChild>
-                    <Link href={`/articles/${article.id}`}>Read article</Link>
-                  </Button>
-                </CardContent>
-              </Card>
+                  <CardHeader className="space-y-3">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1">
+                        {article.faculty}
+                      </span>
+                      <span>{article.section}</span>
+                    </div>
+                    <CardTitle className="text-xl leading-snug">
+                      {article.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm leading-6">
+                      {article.excerpt}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between text-xs text-slate-500">
+                      <span>{article.author}</span>
+                      <span>{article.readTime}</span>
+                    </div>
+                    <Button className="w-full" asChild>
+                      <Link href={`/articles/${article.id}`}>Read article</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
             ))}
           </div>
         ) : (

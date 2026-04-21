@@ -7,6 +7,7 @@ import { DataTable } from "@/components/DataTable";
 import { StatCard } from "@/components/StatCard";
 import { Button } from "@/components/ui/button";
 import { resetUserPasswordAction } from "@/lib/actions/admin.action";
+import { OrangeCircleLoader } from "@/components/ui/orange-circle-loader";
 import {
   Dialog,
   DialogContent,
@@ -266,7 +267,14 @@ export default function UserTable({ initialUsers = [], faculties = [] }) {
                 void handleConfirmResetPassword();
               }}
             >
-              {isResettingPassword ? "Resetting..." : "Confirm Reset"}
+              {isResettingPassword ? (
+                <span className="inline-flex items-center gap-2">
+                  <OrangeCircleLoader size="sm" />
+                  Resetting...
+                </span>
+              ) : (
+                "Confirm Reset"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
